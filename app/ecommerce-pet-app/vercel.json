@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "installCommand": "npm install && npx prisma generate",
+  "cleanUrls": true,
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

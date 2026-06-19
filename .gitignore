@@ -45,6 +45,7 @@ dist/
 build/
 .turbo/
 .vercel/
+.vercel-tmp/
 
 # ===== 密钥/敏感文件 =====
 *.pem
