@@ -2,7 +2,14 @@
 
 ## 项目概述
 
-Shopify 定制宠物油画线上商店。买家在商品详情页上传宠物照片、选择油画风格，后端调用 AI 模型（Replicate `google/nano-banana`）生成对应风格的油画，买家确认预览后下单。
+Shopify 定制宠物油画线上商店。买家在商品详情页上传宠物照片、选择油画风格，后端调用 AI 模型（Replicate `google/nano-banana`）生成对应风格的油画，买家确认后直跳 Shopify 结账页完成支付。
+
+**当前状态：**
+- ✅ 前端完整定制流程已通（上传→生成→动态价格→Checkout→Shopify 结账）
+- ✅ App API 路由已完成（upload/generate/job-status/health/init-metafields）
+- ✅ Mock 模式（`USE_REPLICATE=false`）：跳过 AI 生成，直接返回上传照片
+- ⏳ Supabase 数据库暂停 → webhook/metafields 延迟验证（Line Item Properties 已可用）
+- 🚀 Vercel 已部署：前端 `pet-paiting-frontend.vercel.app`，App `pet-paiting-app.vercel.app`
 
 ---
 
@@ -10,12 +17,14 @@ Shopify 定制宠物油画线上商店。买家在商品详情页上传宠物照
 
 ```
 e-commerce/
-├── frontend/                     # Next.js Headless 前端（待实现）
-├── app/ecommerce-pet-app/        # Shopify App（React Router v7 + Prisma + Supabase）
+├── frontend/                     # Next.js Headless 前端（已实现）
+├── app/ecommerce-pet-app/        # Shopify App（React Router v7 + Prisma + PostgreSQL）
 ├── theme/piktura/                # Shopify Theme（保留，不再修改）
 ├── llm/                          # Python 后端（保留，不再使用）
-└── plan-shopify-pet-oil-painting.md  # 技术方案 Spec
+└── WIKI.md                       # 本文件
 ```
+
+**GitHub**: https://github.com/oversky86/pet-painting-zyy
 
 ---
 
@@ -23,21 +32,21 @@ e-commerce/
 
 ```
 Next.js Frontend (frontend/)
-  SSR 商品页 + 定制流程（照片上传/风格选择/预览/加购）
+  SSR 商品页 + 定制流程（照片上传/风格选择/预览/Checkout 直跳）
   │
-  ├── Storefront API (@shopify/hydrogen-react) → 商品数据/购物车/结账
+  ├── Storefront API → 商品数据/购物车创建/结账跳转
   │
   └── App API (REST) → 照片上传/生成预览/任务状态
        │
        ▼
 Shopify App (ecommerce-pet-app)
-  React Router v7 + Prisma + SQLite
-  职责: Replicate 调用、图片搬运、Supabase 存储、订单关联
+  React Router v7 + Prisma + PostgreSQL (Supabase)
+  职责: Replicate 调用、图片搬运、Supabase 存储、Webhook + Metafields
   │
-  ├── Replicate API (replicate npm) → 生成油画图片（异步轮询）
+  ├── Replicate API (replicate npm) → 生成油画（异步轮询，当前 Mock 模式）
   ├── 图片搬运：Replicate 输出 → 内存下载 → Supabase Storage 上传
   ├── Supabase Storage (@supabase/supabase-js) → 原始照片 + 油画存储
-  └── Webhook: orders/create → 订单关联
+  └── Webhook: orders/create → 提取定制属性 → 写入 Order Metafields
 ```
 
 ### 信任边界与安全
@@ -55,55 +64,52 @@ Shopify App (ecommerce-pet-app)
 
 ## 1. Frontend — Next.js Headless
 
-**路径**: `frontend/`（待实现）
+**路径**: `frontend/`
 
 ### 技术选型
 
 | 技术 | 选择 | 理由 |
 |------|------|------|
-| 框架 | Next.js 15 (App Router) | SSR/SSG、生态成熟 |
-| Storefront 集成 | `@shopify/hydrogen-react` | 封装 Storefront API Client，类型安全 |
-| 样式 | Tailwind CSS | 快速开发，响应式 |
-| 状态管理 | React useState + useReducer | 轻量，无需外部库 |
-| 部署 | Vercel 或自托管 | 灵活选择 |
+| 框架 | Next.js 16 (App Router) | SSR/SSG、Turbopack、生态成熟 |
+| Storefront 集成 | 自封装 `storefront.ts` | 直接 GraphQL 调用 Storefront API |
+| 样式 | Tailwind CSS v4 | 快速开发，响应式 |
+| 状态管理 | React useState + useCallback/useMemo | 轻量，React.memo 优化 |
+| 部署 | Vercel (`pet-paiting-frontend`) | 与 App 统一平台 |
 
-### 计划结构
+### 目录结构
 
 ```
 frontend/
 ├── app/
-│   ├── layout.tsx                  # 全局布局（Header/Footer/导航）
-│   ├── page.tsx                    # 首页（商品列表）
-│   ├── products/
-│   │   └── [handle]/
-│   │       └── page.tsx            # 商品详情页（集成定制流程）
-│   └── cart/
-│       └── page.tsx                # 购物车页
+│   ├── layout.tsx                  # 全局布局
+│   ├── page.tsx                    # 首页
+│   └── products/[handle]/
+│       └── page.tsx                # 商品详情页（集成定制流程）
 ├── components/
-│   ├── PetPhotoUpload.tsx          # 照片上传（拖拽+验证）
-│   ├── PaintingStyleSelector.tsx   # 风格选择卡片网格
-│   ├── PaintingPreview.tsx         # 预览展示（对比视图）
-│   ├── ProductCustomizer.tsx       # 定制流程协调器
-│   └── ui/                         # 通用 UI 组件
+│   ├── ProductCustomizer.tsx       # 定制流程核心（协调上传/生成/结账）
+│   ├── PetPhotoUpload.tsx          # 照片上传（拖拽+Canvas 压缩）
+│   ├── PaintingStyleSelector.tsx   # 风格选择
+│   ├── PaintingPreview.tsx         # 预览展示
+│   ├── SelectionsPanel.tsx         # 右侧选项面板（Size/Frame/价格/Checkout）
+│   ├── StepIndicator.tsx           # 步骤指示器
+│   └── CheckoutModal.tsx           # 结账弹窗（当前未使用）
 ├── lib/
-│   ├── storefront.ts              # Shopify Storefront API 封装
-│   ├── app-api.ts                 # 调用 App 后端 API
-│   ├── prompts.ts                 # Prompt 模板（前后端共享）
+│   ├── storefront.ts              # Storefront API 封装（GraphQL + CartInput）
+│   ├── app-api.ts                 # App 后端 API 客户端
+│   ├── prompts.ts                 # Prompt 模板
 │   └── types.ts                   # TypeScript 类型定义
 ├── .env.local                     # 环境变量
-├── next.config.ts
-├── tailwind.config.ts
 └── package.json
 ```
 
 ### 定制流程
 
-1. 照片上传 → App API 上传 → Supabase Storage
-2. 选择油画风格
-3. 点击"生成预览" → App 调用 Replicate → 返回 job_id
-4. 前端每 3 秒轮询 → App 检查 Replicate 状态 → 完成后下载+上传 Supabase
-5. 展示油画预览 → 买家确认
-6. 加入购物车 → Storefront API Cart（line item properties）
+1. 照片上传 → App API → Supabase Storage → 返回永久 URL
+2. 选择油画风格（Classic Oil / Impressionist）
+3. 点击 "Generate Preview" → App 生成预览（Mock 模式直接返回上传照片）
+4. 前端轮询任务状态 → 完成后展示预览
+5. 选择 Size + Frame → 价格动态匹配 Shopify variant
+6. 点击 **Checkout** → `createCart()`（携带定制属性）→ 直跳 Shopify 结账页
 
 ---
 
@@ -111,144 +117,129 @@ frontend/
 
 **路径**: `app/ecommerce-pet-app/`
 
-Shopify 嵌入式应用，基于 React Router v7 (Remix) 全栈框架。同时承担后端服务角色（Replicate 调用、Supabase 存储、图片搬运）。
+Shopify 嵌入式应用 + 后端服务，基于 React Router v7 全栈框架。
 
 ### 目录结构
 
 ```
 app/ecommerce-pet-app/
 ├── app/
-│   ├── routes/                    # 文件系统路由
-│   │   ├── app.tsx                # 受保护布局（authenticate.admin）
-│   │   ├── app._index.tsx         # 管理后台首页
-│   │   ├── app.additional.tsx     # 附加页面
-│   │   ├── api.upload.tsx         # 照片上传（新增）
-│   │   ├── api.generate-preview.tsx  # 生成预览（新增）
-│   │   ├── api.job-status.$jobId.tsx # 任务状态查询（新增）
-│   │   ├── webhooks.orders.create.tsx # 订单 Webhook（新增）
-│   │   ├── auth.$.tsx             # OAuth 认证路由
-│   │   ├── auth.login/            # 登录页
-│   │   ├── _index/                # 根路由
+│   ├── routes/
+│   │   ├── api.upload.tsx              # 照片上传 → Supabase Storage
+│   │   ├── api.generate-preview.tsx    # 生成预览（含 Mock 模式）
+│   │   ├── api.job-status.$jobId.tsx   # 任务状态轮询
+│   │   ├── api.health.tsx              # 健康检查
+│   │   ├── api.init-metafields.tsx     # 创建 Order Metafield Definitions
+│   │   ├── webhooks.orders.create.tsx  # 订单 Webhook → Metafields 写入
 │   │   ├── webhooks.app.uninstalled.tsx
-│   │   └── webhooks.app.scopes_update.tsx
+│   │   ├── webhooks.app.scopes_update.tsx
+│   │   ├── app.tsx                     # 受保护布局
+│   │   ├── app._index.tsx              # 管理后台首页
+│   │   ├── auth.$.tsx                  # OAuth 认证
+│   │   └── auth.login/                 # 登录页
 │   ├── utils/
-│   │   ├── replicate.server.ts    # Replicate API 封装（新增）
-│   │   ├── supabase.server.ts     # Supabase Storage 封装（新增）
-│   │   ├── prompts.server.ts      # Prompt 模板（新增）
-│   │   └── rate-limit.server.ts   # 速率限制（新增）
-│   ├── shopify.server.ts          # Shopify App 初始化（核心）
-│   ├── db.server.ts               # Prisma 客户端单例
-│   ├── entry.server.tsx           # SSR 入口
-│   ├── root.tsx                   # React 根布局
-│   └── routes.ts                  # 路由定义（flatRoutes）
+│   │   ├── replicate.server.ts         # Replicate API 封装
+│   │   ├── supabase.server.ts          # Supabase Storage 封装
+│   │   ├── prompts.server.ts           # Prompt 模板
+│   │   ├── rate-limit.server.ts        # 速率限制
+│   │   ├── cors.server.ts              # CORS 工具
+│   │   └── job-store.server.ts         # Job 存储抽象（dev=内存, prod=Prisma）
+│   ├── shopify.server.ts              # Shopify App 初始化
+│   ├── db.server.ts                   # Prisma 客户端单例
+│   └── entry.server.tsx               # SSR 入口
 ├── prisma/
-│   ├── schema.prisma              # 数据库模型
-│   └── migrations/                # 迁移文件
-├── shopify.app.toml               # App 配置（核心）
-├── vite.config.ts                 # Vite 构建配置
-├── Dockerfile                     # Docker 多阶段构建
-├── package.json                   # 依赖和脚本
-└── tsconfig.json                  # TypeScript 配置
+│   └── schema.prisma                  # 数据库模型
+├── shopify.app.toml                   # App 配置
+├── react-router.config.ts            # Vercel preset
+└── package.json
 ```
 
-### 核心文件
+### 数据库模型 (Prisma)
 
-#### shopify.server.ts — Shopify 集成入口
+| 模型 | 说明 | 状态 |
+|------|------|------|
+| Session | 商家登录会话 | ✅ 已有 |
+| GenerationJob | 生成任务（状态/照片URL/结果URL） | ✅ 已实现 |
+| PaintingStyle | 油画风格配置 | 已定义 |
+| OrderRecord | 订单与生成任务关联 | 已定义 |
 
-```typescript
-const shopify = shopifyApp({
-  apiKey: process.env.SHOPIFY_API_KEY,
-  apiSecretKey: process.env.SHOPIFY_API_SECRET,
-  apiVersion: ApiVersion.October25,
-  scopes: process.env.SCOPES?.split(","),
-  appUrl: process.env.SHOPIFY_APP_URL,
-  sessionStorage: new PrismaSessionStorage(prisma),
-  distribution: AppDistribution.AppStore,
-});
+### 核心配置 (shopify.app.toml)
 
-// 导出认证方法
-export const authenticate = shopify.authenticate;  // .admin() / .webhook()
-export const unauthenticated = shopify.unauthenticated;
-```
-
-#### 数据库模型 (Prisma)
-
-当前 `Session` 模型（维持商家登录状态），计划扩展：
-
-| 模型 | 说明 |
-|------|------|
-| Session | 已有，商家登录会话 |
-| GenerationJob | 计划：生成任务（状态/照片URL/结果URL/Replicate ID） |
-| PaintingStyle | 计划：油画风格配置（名称/prompt/排序） |
-| OrderRecord | 计划：订单与生成任务关联 |
-
-### App 配置 (shopify.app.toml)
-
-| 配置项 | 当前值 |
-|--------|--------|
+| 配置项 | 值 |
+|--------|------|
 | client_id | `8f74713e6783c3adeb81b302e8e95866` |
 | embedded | true |
-| scopes | `write_products, write_metaobjects, write_metaobject_definitions` |
+| application_url | `https://pet-paiting-app.vercel.app` |
+| scopes | `write_products, write_metaobjects, write_metaobject_definitions, read_orders, write_orders` |
 | API Version | 2026-07 |
-| Webhooks | `app/uninstalled`, `app/scopes_update` |
-
-### 技术依赖
-
-| 依赖 | 版本 | 用途 |
-|------|------|------|
-| react-router | ^7.12.0 | 全栈框架 |
-| @shopify/shopify-app-react-router | ^1.1.0 | Shopify 认证集成 |
-| @shopify/shopify-app-session-storage-prisma | ^9.0.0 | Prisma 会话存储 |
-| @prisma/client | ^6.16.3 | 数据库 ORM |
-| @shopify/app-bridge-react | ^4.2.4 | App Bridge React |
-| replicate | ^1.0.0 | Replicate SDK（计划新增） |
-| @supabase/supabase-js | ^2.0.0 | Supabase Storage（计划新增） |
-| nanoid | ^5.0.0 | 任务 ID 生成（计划新增） |
+| Webhooks | `app/uninstalled`, `app/scopes_update`, `orders/create` |
 
 ### 开发命令
 
 ```bash
-npm run dev          # shopify app dev — 启动开发环境 + 隧道
-npm run build        # react-router build — 生产构建
-npm run setup        # prisma generate && prisma migrate deploy — 数据库初始化
-npm run lint         # ESLint 检查
-npm run typecheck    # TypeScript 类型检查
+# 前端
+cd frontend && npm run dev           # http://localhost:3000
+
+# App（本地开发）
+cd app/ecommerce-pet-app && PORT=3001 npx react-router dev
+
+# 部署
+vercel --yes --prod                  # 部署到 Vercel
+npx shopify app deploy               # 同步 App 配置到 Shopify
 ```
 
-### 编码规范
+### 本地开发特殊处理
 
-- 路由文件必须导出 `loader`（GET）和/或 `action`（POST/PUT/DELETE）
-- 受保护路由在 `loader`/`action` 入口调用 `authenticate.admin(request)`
-- Webhook 处理通过 `authenticate.webhook(request)` 解析，完成后返回 `new Response()`
+- **MemorySessionStorage**: 本地避免 Supabase IPv6 连接问题
+- **内存 Job Store**: 本地用 `Map` 替代 Prisma，避免数据库依赖
+- **Mock 模式**: `USE_REPLICATE=false` 跳过 AI 生成
 
 ---
 
-## 3. Theme — Piktura（保留，不再修改）
-
-**路径**: `theme/piktura/`
-
-Shopify 自定义 Liquid 主题，已初始化但不再作为前端使用。架构已迁移至 Next.js Headless。
-
-### 目录结构
+## 3. 购买流程
 
 ```
-theme/piktura/
-├── layout/              # 全局布局骨架
-├── templates/           # JSON 模板
-├── sections/            # 模块化内容区块
-├── blocks/              # 细粒度嵌套组件
-├── snippets/            # 可复用 UI 片段
-├── assets/              # 静态资源
-├── config/              # 主题设置
-├── locales/             # 翻译文件
-└── AGENTS.md            # 主题架构开发指南
+1. 买家访问 Next.js 商品页 → 浏览商品（SSR + Storefront API）
+2. 上传宠物照片 → App API → Supabase Storage 原始照片
+3. 选择油画风格 → 点击 "Generate Preview"
+4. Mock 模式：跳过 Replicate，直接返回上传照片作为结果
+5. 前端轮询任务状态 → 完成后展示预览
+6. 前端展示油画预览 → 右侧面板显示（动态价格匹配 Shopify variant）
+7. 选择 Size + Frame → 价格实时从 Shopify variant 匹配更新
+8. 点击 Checkout → createCart()（携带定制属性）→ 直跳 Shopify 原生结账页
+9. Shopify 结账页收集用户信息（email/姓名/地址）并完成支付
+10. Webhook orders/create → App 提取定制属性 → 写入 Order Metafields
 ```
 
 ---
 
-## 4. AI 模型 — google/nano-banana
+## 4. 订单定制信息存储
 
-通过 Replicate API 调用，从 Shopify App（TypeScript）直接调用。
+### 层① Cart Line Item Properties（前端创建时传入）
+
+| Attribute Key | 值 | 用途 |
+|---|---|---|
+| `original_photo_url` | 用户上传的原始照片 URL | 商家查看原始素材 |
+| `painting_url` | AI 生成的油画图片 URL | 商家查看生成结果 |
+| `style` | 油画风格 key | 定制风格标识 |
+
+> 自动出现在 Shopify Admin 订单详情的 **Additional Details** 区域。
+
+### 层② Order Metafields（Webhook 写入，namespace: `custom`）
+
+| Metafield Key | Type | Access | 来源 |
+|---|---|---|---|
+| `original_photo_url` | single_line_text_field | MERCHANT_READ | cart attribute |
+| `painting_url` | single_line_text_field | MERCHANT_READ | cart attribute |
+| `painting_style` | single_line_text_field | MERCHANT_READ | cart attribute `style` |
+
+> Metafield Definition 需先创建（Admin UI 或 `/api/init-metafields`），pin: true。
+
+---
+
+## 5. AI 模型 — google/nano-banana
+
+通过 Replicate API 调用，当前使用 **Mock 模式**（`USE_REPLICATE=false`）。
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
@@ -257,101 +248,26 @@ theme/piktura/
 | `aspect_ratio` | enum | 否 | match_input_image, 1:1, 2:3, 3:2... |
 | `output_format` | enum | 否 | jpg, png |
 
-**Output**: string (URI) — 生成的图片 URL，**1小时后自动删除**，需及时搬运到 Supabase Storage。
-
-### 调用方式
-
-```ts
-// 异步创建 prediction（不阻塞）
-const prediction = await replicate.predictions.create({
-  version: "<nano-banana-version>",
-  input: { prompt, image_input: [photoUrl], aspect_ratio: "match_input_image", output_format: "jpg" },
-});
-
-// 轮询状态
-const result = await replicate.predictions.get(prediction.id);
-// result.status: "starting" | "processing" | "succeeded" | "failed"
-// result.output: "https://replicate.delivery/..."（成功时）
-```
+**Output**: string (URI) — 生成图片 URL，1小时后过期，需及时搬运到 Supabase Storage。
 
 ---
 
-## 5. 图片持久化存储（Supabase Storage）
-
-采用 **Supabase Storage** 作为图片持久化存储：
+## 6. 图片持久化存储（Supabase Storage）
 
 ```
-Replicate 生成完成 (美国)
-  → App 轮询发现完成 → fetch 下载图片到内存
-  → 上传到 Supabase Storage "paintings" bucket
+上传/生成完成
+  → 上传到 Supabase Storage "paintings" bucket (public)
   → 返回永久公开 URL
-```
 
-**Supabase Bucket 结构：**
-```
+Bucket 结构:
 paintings/ (public)
-├── originals/{shop}/{job_id}/original.jpg     # 原始宠物照片
-└── paintings/{shop}/{job_id}/painting.jpg     # AI 生成的油画
-```
-
-### 免费额度评估
-
-| 资源 | 免费额度 | 升级 Pro ($25/月) |
-|------|---------|-------------------|
-| 存储 | 1 GB | 100 GB |
-| 带宽 | 5 GB/月 | 250 GB/月 |
-| 数据库 | 500 MB | 8 GB |
-
-**结论**：前期验证阶段（<10 单/天）免费额度够用；规模化后升级 Pro（$25/月）。
-
----
-
-## 6. 购买流程
-
-```
-1. 买家访问 Next.js 商品页 → 浏览商品（SSR + Storefront API）
-2. 上传宠物照片 → App API 上传 → Supabase Storage
-3. 选择油画风格 → 点击 "Generate Preview"
-4. App 调用 Replicate predictions.create() → 返回 job_id
-5. 前端每 3 秒轮询 → App 调 predictions.get() 检查状态
-6. Replicate 完成 → App 下载输出到内存 → 上传 Supabase Storage
-7. 返回 Supabase 永久 URL
-8. 前端展示油画预览 → 买家确认
-9. 加入购物车 → Storefront API Cart（line item properties）
-10. 结账 → Shopify 原生结账页
-11. Webhook orders/create → App 记录订单关联
+├── originals/{shop}/{job_id}/original.jpg
+└── paintings/{shop}/{job_id}/painting.jpg
 ```
 
 ---
 
-## 7. 订单图片写入方案
-
-采用 **双层策略** 确保图片信息完整写入订单：
-
-### 层① Line Item Properties（加购时自动携带）
-
-| 属性 | 购物车可见 | 说明 |
-|------|-----------|------|
-| `_pet_photo_url` | 否 | 原始宠物照片 URL（Supabase） |
-| `_preview_image_url` | 否 | 生成的油画图片 URL（Supabase） |
-| `_painting_style` | 否 | 油画风格 ID |
-| `_generation_job_id` | 否 | 生成任务 ID |
-| `Painting Style` | 是 | 风格名称（买家可见） |
-
-### 层② Order Metafields（Webhook 触发写入）
-
-通过 `metafieldsSet` mutation 写入，namespace `$app:painting`：
-
-| Key | 说明 |
-|-----|------|
-| `pet_photo_url` | 原始照片 Supabase URL |
-| `painting_result_url` | 油画结果 Supabase URL |
-| `painting_style` | 风格 ID |
-| `generation_job_id` | 生成任务 ID |
-
----
-
-## 8. 环境变量
+## 7. 环境变量
 
 ### Frontend (.env.local)
 
@@ -359,106 +275,91 @@ paintings/ (public)
 |------|------|
 | `NEXT_PUBLIC_SHOP_DOMAIN` | Shopify 店铺域名 |
 | `NEXT_PUBLIC_STOREFRONT_TOKEN` | Storefront API 公开 token |
-| `NEXT_PUBLIC_APP_URL` | App 公网 URL |
+| `NEXT_PUBLIC_APP_URL` | App API 地址（本地: `http://localhost:3001`，生产: Vercel URL） |
 
-### App (.env)
+### App (Vercel / .env)
 
 | 变量 | 说明 |
 |------|------|
-| `SHOPIFY_API_KEY` | Shopify CLI 自动注入 |
-| `SHOPIFY_API_SECRET` | Shopify CLI 自动注入 |
-| `SHOPIFY_APP_URL` | Shopify CLI 自动注入 |
+| `SHOPIFY_API_KEY` | Shopify App API Key |
+| `SHOPIFY_API_SECRET` | Shopify App API Secret |
+| `SHOPIFY_APP_URL` | App 公网 URL (`https://pet-paiting-app.vercel.app`) |
 | `SCOPES` | `write_products,write_metaobjects,write_metaobject_definitions,read_orders,write_orders` |
-| `DATABASE_URL` | `file:dev.sqlite`（MVP） |
+| `DATABASE_URL` | Supabase PgBouncer pooler（**端口 6543**，含 `pgbouncer=true`） |
+| `DIRECT_URL` | Supabase 直连（端口 5432） |
 | `REPLICATE_API_TOKEN` | Replicate API Token |
 | `REPLICATE_MODEL_VERSION` | nano-banana 模型版本 hash |
 | `SUPABASE_URL` | Supabase 项目 URL |
-| `SUPABASE_SERVICE_KEY` | Supabase 服务端密钥 |
+| `SUPABASE_SERVICE_KEY` | Supabase 服务端密钥（RLS 绕过） |
 | `RATE_LIMIT_MAX` | 每分钟最大请求数（默认 60） |
 | `RATE_LIMIT_WINDOW` | 限流窗口秒数（默认 60） |
 
 ---
 
-## 9. 关键技术决策
+## 8. 关键技术决策
 
 | 决策 | 方案 | 理由 |
 |------|------|------|
-| 前端 | Next.js 15 (Headless) | SSR/SSG、Storefront API、灵活部署 |
-| Storefront 集成 | @shopify/hydrogen-react | 封装 Storefront Client，类型安全 |
+| 前端 | Next.js 16 (Headless) | SSR/SSG、Turbopack、灵活部署 |
+| Storefront 集成 | 自封装 GraphQL | 直接调用 Storefront API，CartInput 包装 |
 | 后端 | Shopify App (TypeScript) | 单服务，无 Python/Lambda 层 |
-| Replicate 调用 | predictions.create() + 轮询 | 异步创建，前端轮询时检查状态 |
+| Replicate 调用 | predictions.create() + 轮询 | 异步创建，前端轮询检查状态 |
 | 图片搬运 | App 内存下载 → Supabase 上传 | 无 Lambda，架构最简 |
-| 图片存储 | Supabase Storage | 简单、永久 URL、MVP 阶段够用 |
-| 异步通知 | 客户端轮询 (3s) | 简单可靠 |
-| 数据库 MVP | SQLite (Prisma) | 开箱即用 |
+| 图片存储 | Supabase Storage | 简单、永久 URL、免费额度够用 |
+| 数据库 | PostgreSQL (Supabase) | 生产级，Prisma ORM |
+| 结账流程 | 直跳 Shopify 原生结账页 | 无弹窗，用户信息由 Shopify 收集 |
+| 订单图片 | Line Item Properties + Order Metafields | 双层保障 |
 | 商品模式 | 预设商品 + line item properties | Shopify 标准方案 |
+| 本地开发 | MemorySessionStorage + 内存 JobStore | 避免 Supabase IPv6 连接问题 |
 
 ---
 
-## 10. 前端性能 & SEO & 可访问性规范（最高优先级）
+## 9. 前端性能 & SEO & 可访问性规范
 
-每次输出代码必须满足以下规范。详见技术方案 Spec 第十章完整检查清单。
+详见技术方案 Spec 完整检查清单。核心要求：
 
-### 性能核心
-
-| 类别 | 规范 |
-|------|------|
-| React | React.memo + useCallback/useMemo，禁止 JSX 内联，useEffect 清理 |
-| Next.js | next/image（替代 img）、next/font（display:swap）、next/dynamic 懒加载、ISR revalidate |
-| 网络 | preconnect Shopify CDN/Supabase/Replicate、Link prefetch、非首屏延迟加载 |
-| 上传专项 | Canvas 压缩 ≤ 2MB、FileReader 即时预览、Web Worker 处理、轮询指数退避 |
-| 包体积 | @next/bundle-analyzer，首屏 JS < 200KB gzip，afterInteractive 加载第三方脚本 |
-
-### SEO 核心
-
-| 类别 | 规范 |
-|------|------|
-| 页面级 | 语义化 HTML、generateMetadata(title/og/twitter/canonical)、唯一 h1、SSR 关键内容 |
-| Schema.org | Product + BreadcrumbList + Organization JSON-LD |
-| 站点级 | sitemap.ts 自动生成、robots.ts 屏蔽 API、语义化 404 |
-| 图片 | alt 有语义、next/image 自动宽高（防 CLS） |
-
-### 可访问性核心
-
-| 规范 | 实现 |
-|------|------|
-| Skip navigation | `sr-only focus:not-sr-only` 跳转链接 |
-| 状态播报 | aria-live="polite" 生成进度 |
-| 键盘导航 | Tab/Enter/Escape 操作所有交互元素 |
-| 焦点管理 | dialog 焦点锁定，关闭返回触发元素 |
-| 对比度 | ≥ 4.5:1 (WCAG AA) |
-
-### Core Web Vitals 目标
-
-| LCP < 2.5s | CLS < 0.1 | INP < 200ms | TTFB < 800ms | FCP < 1.8s |
-|------------|-----------|-------------|--------------|------------|
-| SSR + priority 图 + preconnect | next/image + font swap + 占位 | Worker + 退避 + 事件委托 | Edge + ISR | 关键 CSS + 字体 preload |
+| 类别 | 核心规范 |
+|------|---------|
+| React | React.memo + useCallback/useMemo，禁止内联，useEffect 清理 |
+| Next.js | next/image、next/font（swap）、dynamic 懒加载、ISR |
+| SEO | 语义化 HTML、Schema.org JSON-LD、SSR 关键内容、sitemap/robots |
+| 可访问性 | aria-live 状态播报、键盘导航、焦点管理、对比度 ≥ 4.5:1 |
+| Core Web Vitals | LCP<2.5s, CLS<0.1, INP<200ms |
 
 ---
 
-## 11. 实施任务清单
+## 10. 实施任务清单
 
 | Task | 模块 | 内容 | 状态 |
 |------|------|------|------|
-| 1 | Frontend | Next.js 15 初始化（App Router + Tailwind + Storefront API） | 待实施 |
-| 2 | App | Prisma Schema 迁移（GenerationJob/PaintingStyle/OrderRecord） | 待实施 |
-| 3 | App | Supabase Storage 集成（上传/检查） | 待实施 |
-| 4 | App | Replicate 集成（create/get/download） | 待实施 |
-| 5 | App | API 路由（upload/generate-preview/job-status + 图片搬运） | 待实施 |
-| 6 | App | 配置更新（scopes + webhooks + CORS） | 待实施 |
-| 7 | App | Webhook 处理（orders/create + OrderRecord） | 待实施 |
-| 8 | Frontend | 定制组件（PhotoUpload/StyleSelector/Preview/Customizer） | 待实施 |
-| 9 | Frontend | 商品页集成（定制流程 + Storefront Cart API） | 待实施 |
+| 1 | Frontend | Next.js 初始化 + 商品页 + 定制组件 | ✅ 完成 |
+| 2 | App | Prisma Schema（Session/GenerationJob/PaintingStyle/OrderRecord） | ✅ 完成 |
+| 3 | App | Supabase Storage 集成 | ✅ 完成 |
+| 4 | App | Replicate 集成（当前 Mock 模式） | ✅ 完成 |
+| 5 | App | API 路由（upload/generate/job-status + 图片搬运） | ✅ 完成 |
+| 6 | App | 配置更新（scopes + webhooks + CORS + toml URL） | ✅ 完成 |
+| 7 | App | Webhook（orders/create + Metafields 写入） | ⏳ 代码完成，待 Supabase 恢复后验证 |
+| 8 | Frontend | 定制组件（PhotoUpload/StyleSelector/Preview/Customizer） | ✅ 完成 |
+| 9 | Frontend | 商品页集成（定制流程 + 动态价格 + Checkout 直跳） | ✅ 完成 |
 | 10 | App | 管理后台页面（orders 列表 + styles 管理） | 待实施 |
-| 11 | 全部 | 端到端测试（上传→风格→预览→购物车→结账→订单关联） | 待实施 |
+| 11 | 全部 | 端到端测试 | ⏳ 部分完成（webhook 待验证） |
 
 ---
 
-## 12. MCP 工具约束（最高优先级）
+## 11. 已知问题与待办
 
-本项目涉及 Replicate 和 Shopify 的开发工作，**必须优先使用以下 MCP 工具**获取准确信息：
+### 阻塞问题
+- **Supabase 数据库暂停** → webhook 认证和 metafields 写入无法执行
 
-- **Shopify MCP**: 查询 Shopify API（GraphQL Admin API, Storefront API, metafields, webhooks 等）
-- **Replicate MCP**: 查询 Replicate 模型信息、Input/Output schema、API 调用方式
+### 降级方案（当前可用）
+- Line Item Properties 已写入订单（Admin 订单详情 → Additional Details 可见）
+- Mock 模式跳过 AI 生成，直接返回上传照片
 
-禁止凭记忆或猜测编写 Shopify API 或 Replicate 模型参数。
+### Supabase 恢复后待办
+1. 确认 Supabase 项目已恢复（Dashboard → Restore）
+2. 运行 `npx prisma migrate deploy` 创建 session 表
+3. 验证 Vercel 环境变量（DATABASE_URL 端口 6543）
+4. 重新部署 Vercel App
+5. 端到端测试：上传→生成→Checkout→结账→完成支付
+6. 检查 Vercel 日志确认 webhook 触发 + metafields 写入成功
+7. 确认 Shopify Admin 订单详情中 metafields 有值
