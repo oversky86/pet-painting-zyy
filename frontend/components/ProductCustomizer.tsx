@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef, memo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef, memo } from "react";
 import type { Step, MoneyV2, ProductVariant } from "@/lib/types";
 import { StepIndicator } from "./StepIndicator";
 import { PetPhotoUpload } from "./PetPhotoUpload";
@@ -8,6 +8,7 @@ import { PaintingStyleSelector } from "./PaintingStyleSelector";
 import { PaintingPreview } from "./PaintingPreview";
 import { SelectionsPanel } from "./SelectionsPanel";
 import { uploadPhoto, generatePreview, getJobStatus } from "@/lib/app-api";
+import { createCart } from "@/lib/storefront";
 
 interface Props {
   productHandle: string;
@@ -27,7 +28,8 @@ export const ProductCustomizer = memo(function ProductCustomizer({
   productImage,
   sizeOptions,
   frameOptions,
-  price,
+  price: fallbackPrice,
+  variants,
 }: Props) {
   // Step state
   const [step, setStep] = useState<Step>("create");
@@ -52,6 +54,9 @@ export const ProductCustomizer = memo(function ProductCustomizer({
   const abortRef = useRef<AbortController | null>(null);
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Checkout state
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+
   // Performance: useCallback for stable references
   const handlePhotoUpload = useCallback(async (file: File) => {
     setStatus("uploading");
@@ -66,6 +71,43 @@ export const ProductCustomizer = memo(function ProductCustomizer({
       setStatus("error");
     }
   }, []);
+
+  // Dynamic price: find matching variant based on selected size + frame
+  const currentPrice = useMemo(() => {
+    if (!variants?.length) return fallbackPrice;
+    const match = variants.find((v) => {
+      const opts = v.selectedOptions.reduce(
+        (acc, o) => ({ ...acc, [o.name.toLowerCase()]: o.value }),
+        {} as Record<string, string>
+      );
+      return opts.size === size && opts.frame === frame;
+    });
+    return match?.price ?? fallbackPrice;
+  }, [variants, size, frame, fallbackPrice]);
+
+  const currentCompareAtPrice = useMemo(() => {
+    if (!variants?.length) return null;
+    const match = variants.find((v) => {
+      const opts = v.selectedOptions.reduce(
+        (acc, o) => ({ ...acc, [o.name.toLowerCase()]: o.value }),
+        {} as Record<string, string>
+      );
+      return opts.size === size && opts.frame === frame;
+    });
+    return match?.compareAtPrice ?? null;
+  }, [variants, size, frame]);
+
+  // Find the currently selected variant (for checkout)
+  const selectedVariant = useMemo(() => {
+    if (!variants?.length) return null;
+    return variants.find((v) => {
+      const opts = v.selectedOptions.reduce(
+        (acc, o) => ({ ...acc, [o.name.toLowerCase()]: o.value }),
+        {} as Record<string, string>
+      );
+      return opts.size === size && opts.frame === frame;
+    }) ?? null;
+  }, [variants, size, frame]);
 
   const handleStyleSelect = useCallback((s: string) => setStyle(s), []);
 
@@ -138,6 +180,37 @@ export const ProductCustomizer = memo(function ProductCustomizer({
       setStep("details");
     }
   }, [status]);
+
+  // Checkout: create cart → redirect to Shopify checkout
+  const handleCheckout = useCallback(async () => {
+    if (status !== "done" || !resultUrl || !selectedVariant) return;
+
+    setIsCheckoutLoading(true);
+    setErrorMessage("");
+
+    try {
+      const cart = await createCart([
+        {
+          merchandiseId: selectedVariant.id,
+          attributes: [
+            { key: "original_photo_url", value: photoUrl },
+            { key: "painting_url", value: resultUrl },
+            { key: "style", value: style },
+          ],
+        },
+      ]);
+
+      if (cart.checkoutUrl) {
+        window.location.href = cart.checkoutUrl;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setErrorMessage("Failed to create order. Please try again.");
+      setIsCheckoutLoading(false);
+    }
+  }, [selectedVariant, photoUrl, resultUrl, style]);
 
   // Performance: Cleanup on unmount (prevent memory leaks)
   useEffect(() => {
@@ -270,33 +343,15 @@ export const ProductCustomizer = memo(function ProductCustomizer({
                 size={size}
                 frame={frame}
                 previewStatus={previewStatus}
-                price={price}
-                onContinue={handleContinueToDetails}
+                price={currentPrice}
+                compareAtPrice={currentCompareAtPrice}
+                onCheckout={handleCheckout}
                 canContinue={!!canContinueToDetails}
+                isLoading={isCheckoutLoading}
               />
             </div>
           )}
         </div>
-      )}
-
-      {/* DETAILS step (step 03) — placeholder for Task 9 */}
-      {step === "details" && (
-        <section className="max-w-2xl mx-auto py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Order Details</h2>
-          <p className="text-[var(--color-muted)]">
-            Shipping information and special instructions will be collected here.
-          </p>
-        </section>
-      )}
-
-      {/* CHECKOUT step (step 04) — placeholder for Task 9 */}
-      {step === "checkout" && (
-        <section className="max-w-2xl mx-auto py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Checkout</h2>
-          <p className="text-[var(--color-muted)]">
-            Shopify checkout integration coming soon.
-          </p>
-        </section>
       )}
     </div>
   );

@@ -1,9 +1,11 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { nanoid } from "nanoid";
-import prisma from "../db.server";
-import { createPrediction } from "../utils/replicate.server";
+import { createJob } from "../utils/job-store.server";
 import { buildPrompt } from "../utils/prompts.server";
 import { withCors, handleCorsPreflight } from "../utils/cors.server";
+
+// TODO: Restore Replicate integration — currently using uploaded photo as placeholder
+const USE_REPLICATE = false;
 
 // Handle CORS preflight (OPTIONS)
 export function loader({ request }: LoaderFunctionArgs) {
@@ -36,20 +38,23 @@ export async function action({ request }: ActionFunctionArgs) {
     const jobId = nanoid();
     const prompt = buildPrompt(style);
 
-    // Create Replicate prediction (async, does not wait)
-    const prediction = await createPrediction(photo_url, prompt);
+    if (USE_REPLICATE) {
+      // TODO: Restore Replicate flow
+      // const prediction = await createPrediction(photo_url, prompt);
+      // await createJob({ ... replicateId: prediction.id, status: "processing" });
+      return withCors(Response.json({ error: "Replicate not enabled" }, { status: 503 }));
+    }
 
-    // Store job metadata in database
-    await prisma.generationJob.create({
-      data: {
-        id: jobId,
-        shop,
-        petPhotoUrl: photo_url,
-        paintingStyle: style,
-        prompt,
-        status: "processing",
-        replicateId: prediction.id,
-      },
+    // Mock mode: immediately complete with uploaded photo as result
+    await createJob({
+      id: jobId,
+      shop,
+      petPhotoUrl: photo_url,
+      paintingStyle: style,
+      prompt,
+      status: "completed",
+      replicateId: null,
+      resultUrl: photo_url,
     });
 
     return withCors(Response.json({ job_id: jobId, status: "accepted" }));

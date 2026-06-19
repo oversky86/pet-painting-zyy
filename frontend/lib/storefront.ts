@@ -6,7 +6,7 @@ const API_VERSION = "2025-04";
 
 const STOREFRONT_URL = `https://${SHOP_DOMAIN}/api/${API_VERSION}/graphql.json`;
 
-async function storefrontFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
+async function storefrontFetch<T>(query: string, variables?: Record<string, unknown>, options?: { cache?: boolean }): Promise<T> {
   const res = await fetch(STOREFRONT_URL, {
     method: "POST",
     headers: {
@@ -14,7 +14,7 @@ async function storefrontFetch<T>(query: string, variables?: Record<string, unkn
       "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN,
     },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 3600 }, // ISR: revalidate every hour
+    ...(options?.cache === false ? {} : { next: { revalidate: 3600 } }),
   });
 
   if (!res.ok) {
@@ -101,17 +101,18 @@ export async function getProductByHandle(handle: string): Promise<Product> {
   return data.product;
 }
 
-// Cart API (Storefront Cart API)
+// Cart API (Storefront Cart API) — no caching for mutations
 export async function createCart(lines: { merchandiseId: string; attributes?: { key: string; value: string }[] }[]) {
   const data = await storefrontFetch<{
     cartCreate: { cart: { id: string; checkoutUrl: string } };
   }>(
-    `mutation CartCreate($lines: [CartLineInput!]!) {
-      cartCreate(lines: $lines) {
+    `mutation CartCreate($input: CartInput!) {
+      cartCreate(input: $input) {
         cart { id checkoutUrl }
       }
     }`,
-    { lines }
+    { input: { lines } },
+    { cache: false }
   );
   return data.cartCreate.cart;
 }
@@ -128,7 +129,8 @@ export async function addToCart(
         cart { id checkoutUrl }
       }
     }`,
-    { cartId, lines }
+    { cartId, lines },
+    { cache: false }
   );
   return data.cartLinesAdd.cart;
 }

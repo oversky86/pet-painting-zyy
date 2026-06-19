@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
-import prisma from "../db.server";
+import { getJob, updateJob } from "../utils/job-store.server";
 import { getPrediction, downloadImage } from "../utils/replicate.server";
 import { uploadPainting } from "../utils/supabase.server";
 import { withCors, handleCorsPreflight } from "../utils/cors.server";
@@ -20,13 +20,11 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   }
 
   try {
-    // Look up the job in the database
-    const job = await prisma.generationJob.findUnique({
-      where: { id: jobId },
-    });
+    // Look up the job
+    const job = await getJob(jobId);
 
     if (!job) {
-      return Response.json({ status: "not_found" }, { status: 404 });
+      return withCors(Response.json({ status: "not_found" }, { status: 404 }));
     }
 
     // If already completed, return cached result
@@ -48,10 +46,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
     // Handle failed prediction
     if (prediction.status === "failed") {
-      await prisma.generationJob.update({
-        where: { id: jobId },
-        data: { status: "failed" },
-      });
+      await updateJob(jobId, { status: "failed" });
       return withCors(Response.json({
         status: "failed",
         error: prediction.error || "Generation failed",
@@ -76,10 +71,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       const paintingUrl = await uploadPainting(imageBuffer, job.shop, jobId);
 
       // Update job with result
-      await prisma.generationJob.update({
-        where: { id: jobId },
-        data: { status: "completed", resultUrl: paintingUrl },
-      });
+      await updateJob(jobId, { status: "completed", resultUrl: paintingUrl });
 
       return withCors(Response.json({ status: "completed", result_url: paintingUrl }));
     }

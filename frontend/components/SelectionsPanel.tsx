@@ -10,8 +10,10 @@ interface Props {
   frame: string;
   previewStatus: "none" | "generating" | "generated";
   price: MoneyV2;
-  onContinue: () => void;
+  compareAtPrice: MoneyV2 | null;
+  onCheckout: () => void;
   canContinue: boolean;
+  isLoading?: boolean;
 }
 
 // Performance: React.memo to prevent unnecessary re-renders
@@ -21,8 +23,10 @@ export const SelectionsPanel = memo(function SelectionsPanel({
   frame,
   previewStatus,
   price,
-  onContinue,
+  compareAtPrice,
+  onCheckout,
   canContinue,
+  isLoading = false,
 }: Props) {
   const previewLabel =
     previewStatus === "generated"
@@ -61,22 +65,31 @@ export const SelectionsPanel = memo(function SelectionsPanel({
 
       <div className="border-t border-[var(--color-border)] pt-4">
         <p className="text-xs text-[var(--color-muted)]">All-in Price</p>
-        <p className="text-3xl font-bold mt-1">
-          {price.currencyCode === "USD" ? "$" : price.currencyCode}
-          {price.amount}
-        </p>
+        <div className="flex items-baseline gap-2 mt-1">
+          <p className="text-3xl font-bold">
+            {price.currencyCode === "USD" ? "$" : price.currencyCode}
+            {price.amount}
+          </p>
+          {compareAtPrice && parseFloat(compareAtPrice.amount) > parseFloat(price.amount) && (
+            <p className="text-lg text-[var(--color-muted)] line-through">
+              {compareAtPrice.currencyCode === "USD" ? "$" : compareAtPrice.currencyCode}
+              {compareAtPrice.amount}
+            </p>
+          )}
+        </div>
         <p className="text-xs text-[var(--color-muted)] mt-1">
           Includes AI preview, painting, &amp; shipping.
         </p>
       </div>
 
       <button
-        onClick={onContinue}
-        disabled={!canContinue}
+        onClick={onCheckout}
+        disabled={!canContinue || isLoading}
         className="w-full py-3 px-6 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] rounded-lg font-semibold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-        aria-disabled={!canContinue}
+        aria-disabled={!canContinue || isLoading}
+        aria-busy={isLoading}
       >
-        Continue to Preview →
+        {isLoading ? "Creating Order..." : "Checkout"}
       </button>
 
       <button className="text-sm text-[var(--color-muted)] underline hover:text-[var(--foreground)] transition-colors">
