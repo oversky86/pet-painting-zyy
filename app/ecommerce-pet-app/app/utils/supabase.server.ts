@@ -5,7 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY! // Server-side key (bypasses RLS)
 );
 
-const BUCKET = "paintings";
+const BUCKET = "pet-painting";
 
 /**
  * Upload original pet photo to Supabase Storage
