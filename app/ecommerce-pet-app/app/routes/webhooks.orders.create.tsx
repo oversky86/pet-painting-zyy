@@ -1,9 +1,8 @@
 import type { ActionFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { topic, shop, payload } = await authenticate.webhook(request);
+  const { topic, shop, payload, admin } = await authenticate.webhook(request);
 
   if (topic !== "ORDERS_CREATE") {
     throw new Response("Unhandled webhook topic", { status: 404 });
@@ -13,7 +12,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     id: number;
     email?: string;
     total_price?: string;
-    note?: string;
     line_items?: Array<{
       id: number;
       properties?: Array<{ name: string; value: string }>;
@@ -21,37 +19,63 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   };
 
   try {
-    // Find the generation job ID from line item properties
-    let generationJobId: string | null = null;
+    // Extract custom painting attributes from line item properties
+    const customAttrs: Record<string, string> = {};
+    const attrKeys = ["original_photo_url", "painting_url", "style"];
 
     for (const item of orderPayload.line_items || []) {
-      const props = item.properties || [];
-      const jobIdProp = props.find(
-        (p) => p.name === "_generation_job_id"
-      );
-      if (jobIdProp?.value) {
-        generationJobId = jobIdProp.value;
-        break;
+      for (const prop of item.properties || []) {
+        if (attrKeys.includes(prop.name) && prop.value) {
+          customAttrs[prop.name] = prop.value;
+        }
       }
+      if (Object.keys(customAttrs).length === attrKeys.length) break;
     }
 
-    if (generationJobId) {
-      // Create order record linking to generation job
-      await prisma.orderRecord.create({
-        data: {
-          shop,
-          shopifyOrderId: String(orderPayload.id),
-          generationJobId,
-          customerEmail: orderPayload.email || null,
-          totalAmount: orderPayload.total_price || null,
+    // Set order metafields via Admin API if custom attributes exist
+    if (Object.keys(customAttrs).length > 0 && admin) {
+      const metafields = [
+        customAttrs.original_photo_url && {
+          namespace: "custom",
+          key: "original_photo_url",
+          value: customAttrs.original_photo_url,
+          type: "single_line_text_field",
         },
-      });
+        customAttrs.painting_url && {
+          namespace: "custom",
+          key: "painting_url",
+          value: customAttrs.painting_url,
+          type: "single_line_text_field",
+        },
+        customAttrs.style && {
+          namespace: "custom",
+          key: "painting_style",
+          value: customAttrs.style,
+          type: "single_line_text_field",
+        },
+      ].filter(Boolean);
 
-      // Update the generation job with the order ID
-      await prisma.generationJob.update({
-        where: { id: generationJobId },
-        data: { shopifyOrderId: String(orderPayload.id) },
-      });
+      if (metafields.length > 0) {
+        const ownerId = `gid://shopify/Order/${orderPayload.id}`;
+        await admin.graphql(
+          `mutation SetOrderMetafields($ownerId: ID!, $metafields: [MetafieldsSetInput!]!) {
+            metafieldsSet(metafields: $metafields) {
+              metafields { id key namespace }
+              userErrors { message field }
+            }
+          }`,
+          {
+            variables: {
+              ownerId,
+              metafields: metafields.map((mf) => ({
+                ...mf,
+                ownerId,
+              })),
+            },
+          }
+        );
+        console.log(`Order ${orderPayload.id}: set ${metafields.length} metafields`);
+      }
     }
   } catch (error) {
     console.error("Webhook order processing error:", error);
