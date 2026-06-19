@@ -18,7 +18,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }>;
   };
 
+  console.log(`[Webhook] Order ${orderPayload.id} received from ${shop}`);
+  console.log(`[Webhook] admin available: ${!!admin}`);
+
   try {
+    // Log all line item properties for debugging
+    for (const item of orderPayload.line_items || []) {
+      console.log(`[Webhook] Line item ${item.id} properties:`, JSON.stringify(item.properties || []));
+    }
+
     // Extract custom painting attributes from line item properties
     const customAttrs: Record<string, string> = {};
     const attrKeys = ["original_photo_url", "painting_url", "style"];
@@ -32,8 +40,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       if (Object.keys(customAttrs).length === attrKeys.length) break;
     }
 
+    console.log(`[Webhook] Extracted custom attrs:`, JSON.stringify(customAttrs));
+
+    if (!admin) {
+      console.error("[Webhook] No admin session available — cannot set metafields");
+      return new Response();
+    }
+
     // Set order metafields via Admin API if custom attributes exist
-    if (Object.keys(customAttrs).length > 0 && admin) {
+    if (Object.keys(customAttrs).length > 0) {
       const metafields = [
         customAttrs.original_photo_url && {
           namespace: "custom",
@@ -60,29 +75,38 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       if (metafields.length > 0) {
         const ownerId = `gid://shopify/Order/${orderPayload.id}`;
-        await admin.graphql(
-          `mutation SetOrderMetafields($ownerId: ID!, $metafields: [MetafieldsSetInput!]!) {
+        const variables = {
+          ownerId,
+          metafields: metafields.map((mf) => ({ ...mf, ownerId })),
+        };
+
+        console.log(`[Webhook] Setting ${metafields.length} metafields for order ${orderPayload.id}`);
+
+        const response = await admin.graphql(
+          `mutation SetOrderMetafields($metafields: [MetafieldsSetInput!]!) {
             metafieldsSet(metafields: $metafields) {
-              metafields { id key namespace access { storefront admin } }
+              metafields { id key namespace }
               userErrors { message field code }
             }
           }`,
-          {
-            variables: {
-              ownerId,
-              metafields: metafields.map((mf) => ({
-                ...mf,
-                ownerId,
-              })),
-            },
-          }
+          { variables }
         );
-        console.log(`Order ${orderPayload.id}: set ${metafields.length} metafields`);
+
+        const json = await response.json();
+        console.log(`[Webhook] GraphQL response:`, JSON.stringify(json));
+
+        const errors = json.data?.metafieldsSet?.userErrors;
+        if (errors?.length) {
+          console.error(`[Webhook] metafieldsSet errors:`, errors);
+        } else {
+          console.log(`[Webhook] Successfully set ${metafields.length} metafields for order ${orderPayload.id}`);
+        }
       }
+    } else {
+      console.log(`[Webhook] No custom attributes found in order ${orderPayload.id} — skipping metafields`);
     }
   } catch (error) {
-    console.error("Webhook order processing error:", error);
-    // Don't throw — webhook should always return 200 to Shopify
+    console.error("[Webhook] Order processing error:", error);
   }
 
   return new Response();
