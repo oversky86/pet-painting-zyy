@@ -2,16 +2,21 @@ import type { LoaderFunctionArgs } from "react-router";
 import prisma from "../db.server";
 import { getPrediction, downloadImage } from "../utils/replicate.server";
 import { uploadPainting } from "../utils/supabase.server";
+import { withCors, handleCorsPreflight } from "../utils/cors.server";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
+  // Handle CORS preflight
+  const preflight = handleCorsPreflight(request);
+  if (preflight) return preflight;
+
   // Only allow GET
   if (request.method !== "GET") {
-    return Response.json({ error: "Method not allowed" }, { status: 405 });
+    return withCors(Response.json({ error: "Method not allowed" }, { status: 405 }));
   }
 
   const jobId = params.jobId;
   if (!jobId) {
-    return Response.json({ status: "not_found" }, { status: 404 });
+    return withCors(Response.json({ status: "not_found" }, { status: 404 }));
   }
 
   try {
@@ -26,17 +31,17 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
     // If already completed, return cached result
     if (job.status === "completed") {
-      return Response.json({ status: "completed", result_url: job.resultUrl });
+      return withCors(Response.json({ status: "completed", result_url: job.resultUrl }));
     }
 
     // If already failed, return error
     if (job.status === "failed") {
-      return Response.json({ status: "failed", error: "Generation failed" });
+      return withCors(Response.json({ status: "failed", error: "Generation failed" }));
     }
 
     // Poll Replicate for prediction status
     if (!job.replicateId) {
-      return Response.json({ status: "processing" });
+      return withCors(Response.json({ status: "processing" }));
     }
 
     const prediction = await getPrediction(job.replicateId);
@@ -47,10 +52,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         where: { id: jobId },
         data: { status: "failed" },
       });
-      return Response.json({
+      return withCors(Response.json({
         status: "failed",
         error: prediction.error || "Generation failed",
-      });
+      }));
     }
 
     // Handle successful prediction: download → upload to Supabase
@@ -63,7 +68,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
             : "";
 
       if (!outputUrl) {
-        return Response.json({ status: "processing" });
+        return withCors(Response.json({ status: "processing" }));
       }
 
       // Image transfer: Replicate output → memory download → Supabase Storage upload
@@ -76,13 +81,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         data: { status: "completed", resultUrl: paintingUrl },
       });
 
-      return Response.json({ status: "completed", result_url: paintingUrl });
+      return withCors(Response.json({ status: "completed", result_url: paintingUrl }));
     }
 
     // Still processing
-    return Response.json({ status: "processing" });
+    return withCors(Response.json({ status: "processing" }));
   } catch (error) {
     console.error("Job status check error:", error);
-    return Response.json({ status: "processing" }); // Don't fail — let client retry
+    return withCors(Response.json({ status: "processing" }));
   }
 }

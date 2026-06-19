@@ -153,6 +153,8 @@ export const ProductCustomizer = memo(function ProductCustomizer({
   const previewStatus: "none" | "generating" | "generated" =
     status === "done" ? "generated" : isGenerating ? "generating" : "none";
 
+  const showOrderPanel = status === "done" && !!resultUrl;
+
   return (
     <div className="space-y-0">
       {/* Step indicator */}
@@ -252,7 +254,7 @@ export const ProductCustomizer = memo(function ProductCustomizer({
           </div>
 
           {/* Center column: Canvas preview */}
-          <div className="lg:col-span-6 flex items-center justify-center">
+          <div className={`flex items-center justify-center ${showOrderPanel ? "lg:col-span-6" : "lg:col-span-9"}`}>
             <PaintingPreview
               paintingUrl={resultUrl}
               isGenerating={isGenerating}
@@ -260,18 +262,20 @@ export const ProductCustomizer = memo(function ProductCustomizer({
             />
           </div>
 
-          {/* Right column: Selections + Price */}
-          <div className="lg:col-span-3">
-            <SelectionsPanel
-              style={style}
-              size={size}
-              frame={frame}
-              previewStatus={previewStatus}
-              price={price}
-              onContinue={handleContinueToDetails}
-              canContinue={!!canContinueToDetails}
-            />
-          </div>
+          {/* Right column: Order panel — only shown after image generation */}
+          {showOrderPanel && (
+            <div className="lg:col-span-3">
+              <SelectionsPanel
+                style={style}
+                size={size}
+                frame={frame}
+                previewStatus={previewStatus}
+                price={price}
+                onContinue={handleContinueToDetails}
+                canContinue={!!canContinueToDetails}
+              />
+            </div>
+          )}
         </div>
       )}
 
