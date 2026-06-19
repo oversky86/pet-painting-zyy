@@ -40,18 +40,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           key: "original_photo_url",
           value: customAttrs.original_photo_url,
           type: "single_line_text_field",
+          access: "MERCHANT_READ",
         },
         customAttrs.painting_url && {
           namespace: "custom",
           key: "painting_url",
           value: customAttrs.painting_url,
           type: "single_line_text_field",
+          access: "MERCHANT_READ",
         },
         customAttrs.style && {
           namespace: "custom",
           key: "painting_style",
           value: customAttrs.style,
           type: "single_line_text_field",
+          access: "MERCHANT_READ",
         },
       ].filter(Boolean);
 
@@ -60,8 +63,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         await admin.graphql(
           `mutation SetOrderMetafields($ownerId: ID!, $metafields: [MetafieldsSetInput!]!) {
             metafieldsSet(metafields: $metafields) {
-              metafields { id key namespace }
-              userErrors { message field }
+              metafields { id key namespace access { storefront admin } }
+              userErrors { message field code }
             }
           }`,
           {
