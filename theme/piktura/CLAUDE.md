@@ -1,0 +1,1 @@
+/Users/mac/Documents/e-commerce/theme/piktura/AGENTS.md
