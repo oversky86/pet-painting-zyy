@@ -9,7 +9,10 @@ export async function uploadPhoto(file: File): Promise<UploadResponse> {
     method: "POST",
     body: formData,
   });
-  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(`Upload failed: ${res.status} — ${body.detail || body.error || "unknown"}`);
+  }
   return res.json();
 }
 

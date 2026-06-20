@@ -66,8 +66,8 @@ export const ProductCustomizer = memo(function ProductCustomizer({
       setPhotoUrl(result.photo_url);
       setPhotoFileId(result.job_id);
       setStatus("idle");
-    } catch {
-      setErrorMessage("Upload failed. Please try again.");
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Upload failed. Please try again.");
       setStatus("error");
     }
   }, []);

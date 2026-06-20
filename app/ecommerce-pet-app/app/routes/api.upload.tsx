@@ -24,12 +24,15 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
+    console.log("[upload] Received request, method:", request.method);
     const formData = await request.formData();
     const file = formData.get("photo") as File | null;
 
     if (!file) {
       return withCors(Response.json({ error: "No photo provided" }, { status: 400 }));
     }
+
+    console.log("[upload] File received:", file.name, file.type, `${(file.size / 1024).toFixed(1)}KB`);
 
     // Validate file type
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -47,13 +50,15 @@ export async function action({ request }: ActionFunctionArgs) {
     const shop = request.headers.get("X-Shop-Domain") || "default";
     const jobId = nanoid();
 
+    console.log("[upload] Uploading to Supabase Storage, shop:", shop, "jobId:", jobId);
     const photoUrl = await uploadOriginalPhoto(buffer, shop, jobId);
+    console.log("[upload] Success:", photoUrl);
 
     return withCors(Response.json({ photo_url: photoUrl, job_id: jobId }));
-  } catch (error) {
-    console.error("Upload error:", error);
+  } catch (error: any) {
+    console.error("[upload] Error:", error?.message || error, error?.stack || "");
     return withCors(
-      Response.json({ error: "Upload failed. Please try again." }, { status: 503 })
+      Response.json({ error: "Upload failed. Please try again.", detail: error?.message || "unknown" }, { status: 503 })
     );
   }
 }
