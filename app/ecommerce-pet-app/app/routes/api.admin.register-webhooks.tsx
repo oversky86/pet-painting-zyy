@@ -69,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs) {
                 }
               }
             }
-            userErrors { message field code }
+            userErrors { message field }
           }
         }`,
         {

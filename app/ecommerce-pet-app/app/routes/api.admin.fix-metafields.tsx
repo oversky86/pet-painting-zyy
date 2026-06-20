@@ -61,7 +61,7 @@ export async function action({ request }: ActionFunctionArgs) {
           `mutation CreateMetafieldDef($definition: MetafieldDefinitionInput!) {
             metafieldDefinitionCreate(definition: $definition) {
               createdDefinition { id name namespace key }
-              userErrors { message field code }
+              userErrors { message field }
             }
           }`,
           { variables: { definition: def } }
@@ -104,7 +104,7 @@ export async function action({ request }: ActionFunctionArgs) {
         `mutation SetMetafields($metafields: [MetafieldsSetInput!]!) {
           metafieldsSet(metafields: $metafields) {
             metafields { id key namespace value }
-            userErrors { message field code }
+            userErrors { message field }
           }
         }`,
         { variables: { metafields } }

@@ -86,7 +86,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           `mutation SetOrderMetafields($metafields: [MetafieldsSetInput!]!) {
             metafieldsSet(metafields: $metafields) {
               metafields { id key namespace }
-              userErrors { message field code }
+              userErrors { message field }
             }
           }`,
           { variables }
