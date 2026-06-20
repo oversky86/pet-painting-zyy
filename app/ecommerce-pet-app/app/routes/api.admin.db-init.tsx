@@ -1,11 +1,83 @@
-import { type ActionFunctionArgs } from "react-router";
+import { type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { createClient } from "@supabase/supabase-js";
 import prisma from "../db.server";
 
 /**
  * Admin endpoint to initialize database tables and run diagnostics.
  * POST /api/admin/db-init
+ * GET /api/admin/db-init — setup webhook registration
  */
+
+// GET handler: read session + register webhook
+export async function loader({ request }: LoaderFunctionArgs) {
+  try {
+    // Step 1: Read sessions
+    const sessions = await prisma.$queryRaw`
+      SELECT id, shop, "accessToken", "isOnline" FROM "Session" ORDER BY id DESC LIMIT 5`;
+    const sessionList = sessions as any[];
+
+    if (!sessionList || sessionList.length === 0) {
+      return Response.json({
+        status: "no_session",
+        message: "No sessions found. Install the app from Shopify Admin first.",
+      });
+    }
+
+    // Pick offline session or first available
+    const session = sessionList.find((s: any) => s.isOnline === false) || sessionList[0];
+    const shop = session.shop;
+    const accessToken = session.accessToken;
+
+    if (!accessToken) {
+      return Response.json({
+        status: "no_token",
+        sessions: sessionList.map((s: any) => ({ id: s.id, shop: s.shop, hasToken: !!s.accessToken })),
+      });
+    }
+
+    // Step 2: List existing webhooks
+    const listResp = await fetch(`https://${shop}/admin/api/2025-04/webhooks.json`, {
+      headers: { "X-Shopify-Access-Token": accessToken },
+    });
+    const listData = await listResp.json() as any;
+    const existing = (listData.webhooks || []).map((w: any) => ({
+      id: w.id, topic: w.topic, address: w.address,
+    }));
+
+    // Step 3: Register orders/create if not exists
+    const appUrl = process.env.SHOPIFY_APP_URL || "";
+    const address = `${appUrl}/webhooks/orders/create`;
+    const hasIt = existing.some((w: any) => w.topic === "orders/create");
+
+    let createResult: any = "ALREADY_EXISTS";
+    if (!hasIt) {
+      const createResp = await fetch(`https://${shop}/admin/api/2025-04/webhooks.json`, {
+        method: "POST",
+        headers: {
+          "X-Shopify-Access-Token": accessToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          webhook: { topic: "orders/create", address, format: "json" },
+        }),
+      });
+      createResult = await createResp.json();
+    }
+
+    return Response.json({
+      status: "done",
+      shop,
+      webhookAddress: address,
+      existingWebhooks: existing,
+      createResult,
+    });
+  } catch (e: any) {
+    return Response.json({
+      error: e.message || "Unknown error",
+      stack: e.stack?.split("\n").slice(0, 5).join("\n"),
+    }, { status: 500 });
+  }
+}
 export async function action({ request }: ActionFunctionArgs) {
   const results: Record<string, unknown> = {};
 
