@@ -38,6 +38,7 @@ export async function createJob(data: JobRecord): Promise<void> {
       prompt: data.prompt,
       status: data.status,
       replicateId: data.replicateId,
+      resultUrl: data.resultUrl,
     },
   });
 }
