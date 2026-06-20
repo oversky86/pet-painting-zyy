@@ -1,25 +1,22 @@
-import type { ActionFunctionArgs } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 
 /**
  * Register webhook subscriptions via Admin API.
- * POST /api/admin/register-webhooks
- * 
- * Use this when webhooks defined in shopify.app.toml haven't been deployed.
+ * GET or POST /api/admin/register-webhooks
  */
-export async function action({ request }: ActionFunctionArgs) {
-  const { admin, session } = await authenticate.admin(request);
 
-  if (!admin) {
-    return Response.json({ error: "No admin session" }, { status: 401 });
-  }
-
-  const results: Record<string, unknown> = {};
-  const shop = session?.shop || "unknown";
-  results.shop = shop;
-
-  // Check existing webhook subscriptions
+// GET handler — for easy testing from browser URL bar
+export async function loader({ request }: LoaderFunctionArgs) {
   try {
+    const { admin, session } = await authenticate.admin(request);
+    const shop = session?.shop || "unknown";
+
+    if (!admin) {
+      return Response.json({ error: "No admin session", shop });
+    }
+
+    // Just list existing webhooks
     const existingResp = await admin.graphql(`
       {
         webhookSubscriptions(first: 20) {
@@ -28,9 +25,57 @@ export async function action({ request }: ActionFunctionArgs) {
               id
               topic
               endpoint {
-                ... on WebhookHttpEndpoint {
-                  callbackUrl
-                }
+                ... on WebhookHttpEndpoint { callbackUrl }
+              }
+            }
+          }
+        }
+      }
+    `);
+    const existingJson = await existingResp.json();
+    const existing = existingJson.data?.webhookSubscriptions?.edges || [];
+
+    return Response.json({
+      status: "ok",
+      shop,
+      webhooks: existing.map((e: any) => ({
+        topic: e.node.topic,
+        url: e.node.endpoint?.callbackUrl,
+      })),
+      hint: "POST to this endpoint to register ORDERS_CREATE webhook",
+    });
+  } catch (e: any) {
+    return Response.json({
+      error: e.message || "Unknown error",
+      status: e.status || 500,
+      stack: e.stack?.split("\n").slice(0, 3).join("\n"),
+    }, { status: 500 });
+  }
+}
+
+// POST handler — register the webhook
+export async function action({ request }: ActionFunctionArgs) {
+  try {
+    const { admin, session } = await authenticate.admin(request);
+
+    if (!admin) {
+      return Response.json({ error: "No admin session" }, { status: 401 });
+    }
+
+    const results: Record<string, unknown> = {};
+    const shop = session?.shop || "unknown";
+    results.shop = shop;
+
+    // Check existing webhook subscriptions
+    const existingResp = await admin.graphql(`
+      {
+        webhookSubscriptions(first: 20) {
+          edges {
+            node {
+              id
+              topic
+              endpoint {
+                ... on WebhookHttpEndpoint { callbackUrl }
               }
             }
           }
@@ -64,9 +109,7 @@ export async function action({ request }: ActionFunctionArgs) {
               id
               topic
               endpoint {
-                ... on WebhookHttpEndpoint {
-                  callbackUrl
-                }
+                ... on WebhookHttpEndpoint { callbackUrl }
               }
             }
             userErrors { message field }
@@ -88,9 +131,13 @@ export async function action({ request }: ActionFunctionArgs) {
         ? { error: errors }
         : createJson.data?.webhookSubscriptionCreate?.webhookSubscription;
     }
-  } catch (e: any) {
-    results.webhookError = e.message;
-  }
 
-  return Response.json({ status: "done", results });
+    return Response.json({ status: "done", results });
+  } catch (e: any) {
+    return Response.json({
+      error: e.message || "Unknown error",
+      status: e.status || 500,
+      stack: e.stack?.split("\n").slice(0, 3).join("\n"),
+    }, { status: 500 });
+  }
 }
