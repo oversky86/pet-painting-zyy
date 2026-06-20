@@ -32,6 +32,13 @@ export async function loader(_args: LoaderFunctionArgs) {
     const tables = await prisma.$queryRaw`
       SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
     checks.database = `OK — tables: ${(tables as any[]).map((t: any) => t.tablename).join(", ")}`;
+
+    // Check Session table
+    const sessionCount = await prisma.$queryRaw`SELECT count(*) as cnt FROM "Session"`;
+    checks.sessionCount = (sessionCount as any[])?.[0]?.cnt || 0;
+
+    const sessions = await prisma.$queryRaw`SELECT id, shop, "isOnline" FROM "Session" LIMIT 5`;
+    checks.sessions = sessions;
   } catch (e: any) {
     checks.database = `EXCEPTION: ${e.message}`;
   }

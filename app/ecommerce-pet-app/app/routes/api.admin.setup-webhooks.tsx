@@ -4,29 +4,47 @@ import prisma from "../db.server";
 /**
  * Direct webhook registration using stored session token.
  * GET /api/admin/setup-webhooks
- * Bypasses Shopify SDK authenticate.admin() to avoid crashes.
  */
 export async function loader({ request }: LoaderFunctionArgs) {
   try {
-    // Step 1: Get session from database
-    const sessions = await prisma.session.findMany({
-      where: { isOnline: false },
-      orderBy: { createdAt: "desc" },
-      take: 1,
-    });
+    // Step 1: Get offline session from database using raw SQL
+    const sessions = await prisma.$queryRaw`
+      SELECT id, shop, "accessToken", "isOnline"
+      FROM "Session"
+      ORDER BY "createdAt" DESC
+      LIMIT 5
+    `;
 
-    if (sessions.length === 0) {
+    const sessionList = sessions as any[];
+
+    if (!sessionList || sessionList.length === 0) {
       return Response.json({
-        error: "No offline session found. Please install the app from Shopify Admin first.",
-        sessions: await prisma.session.count(),
+        error: "No sessions found in database",
+        hint: "Please install the app from Shopify Admin to create an OAuth session",
       }, { status: 400 });
     }
 
-    const session = sessions[0];
+    // Find offline session (isOnline = false)
+    const offlineSession = sessionList.find((s: any) => s.isOnline === false);
+    const session = offlineSession || sessionList[0];
+
     const shop = session.shop;
     const accessToken = session.accessToken;
 
-    // Step 2: Check existing webhooks via REST API
+    if (!accessToken) {
+      return Response.json({
+        error: "Session found but accessToken is empty",
+        shop,
+        sessions: sessionList.map((s: any) => ({
+          id: s.id,
+          shop: s.shop,
+          isOnline: s.isOnline,
+          hasToken: !!s.accessToken,
+        })),
+      }, { status: 400 });
+    }
+
+    // Step 2: List existing webhooks
     const listResp = await fetch(
       `https://${shop}/admin/api/2025-04/webhooks.json`,
       {
@@ -44,7 +62,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       address: w.address,
     }));
 
-    // Step 3: Check if orders/create is already registered
+    // Step 3: Check if orders/create is registered
     const appUrl = process.env.SHOPIFY_APP_URL || "";
     const webhookAddress = `${appUrl}/webhooks/orders/create`;
     const hasOrdersCreate = existingWebhooks.some(
@@ -91,7 +109,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   } catch (e: any) {
     return Response.json({
       error: e.message || "Unknown error",
-      stack: e.stack?.split("\n").slice(0, 3).join("\n"),
+      stack: e.stack?.split("\n").slice(0, 5).join("\n"),
     }, { status: 500 });
   }
 }
