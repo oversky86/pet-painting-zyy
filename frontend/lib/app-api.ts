@@ -18,12 +18,13 @@ export async function uploadPhoto(file: File): Promise<UploadResponse> {
 
 export async function generatePreview(
   photoUrl: string,
-  style: string
+  style: string,
+  generate?: boolean
 ): Promise<GenerateResponse> {
   const res = await fetch(`${APP_BASE_URL}/api/generate-preview`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ photo_url: photoUrl, style }),
+    body: JSON.stringify({ photo_url: photoUrl, style, generate: generate ?? false }),
   });
   if (!res.ok) throw new Error(`Generate failed: ${res.status}`);
   return res.json();

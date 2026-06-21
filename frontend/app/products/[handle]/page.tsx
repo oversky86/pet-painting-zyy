@@ -117,10 +117,14 @@ function BreadcrumbJsonLd({
 
 export default async function ProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ handle: string }>;
+  searchParams: Promise<{ generate?: string }>;
 }) {
   const { handle } = await params;
+  const { generate } = await searchParams;
+  const useRealGeneration = generate === "true";
   const product = await getProductByHandle(handle);
 
   // Extract unique Size and Frame options from variants
@@ -178,6 +182,7 @@ export default async function ProductPage({
           frameOptions={frameOptions}
           price={product.priceRange.minVariantPrice}
           variants={product.variants.nodes}
+          useRealGeneration={useRealGeneration}
         />
       </section>
     </div>

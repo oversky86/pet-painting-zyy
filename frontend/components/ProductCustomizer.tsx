@@ -19,6 +19,7 @@ interface Props {
   frameOptions: string[];
   price: MoneyV2;
   variants: ProductVariant[];
+  useRealGeneration?: boolean;
 }
 
 // Performance: React.memo to prevent unnecessary re-renders from parent
@@ -30,6 +31,7 @@ export const ProductCustomizer = memo(function ProductCustomizer({
   frameOptions,
   price: fallbackPrice,
   variants,
+  useRealGeneration,
 }: Props) {
   // Step state
   const [step, setStep] = useState<Step>("create");
@@ -159,7 +161,7 @@ export const ProductCustomizer = memo(function ProductCustomizer({
     setErrorMessage("");
 
     try {
-      const result = await generatePreview(photoUrl, style);
+      const result = await generatePreview(photoUrl, style, useRealGeneration);
       setJobId(result.job_id);
 
       // Performance: AbortController for cancelling stale polling
@@ -173,7 +175,7 @@ export const ProductCustomizer = memo(function ProductCustomizer({
       setErrorMessage("Failed to start generation. Please try again.");
       setStatus("error");
     }
-  }, [photoUrl, style, startPolling]);
+  }, [photoUrl, style, startPolling, useRealGeneration]);
 
   const handleContinueToDetails = useCallback(() => {
     if (status === "done") {

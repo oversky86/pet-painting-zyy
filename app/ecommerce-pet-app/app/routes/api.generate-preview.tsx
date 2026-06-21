@@ -4,9 +4,6 @@ import { createJob } from "../utils/job-store.server";
 import { buildPrompt } from "../utils/prompts.server";
 import { withCors, handleCorsPreflight } from "../utils/cors.server";
 
-// TODO: Restore Replicate integration — currently using uploaded photo as placeholder
-const USE_REPLICATE = false;
-
 // Handle CORS preflight (OPTIONS)
 export function loader({ request }: LoaderFunctionArgs) {
   const preflight = handleCorsPreflight(request);
@@ -25,7 +22,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const { photo_url, style } = await request.json();
+    const { photo_url, style, generate } = await request.json();
 
     if (!photo_url || !style) {
       return withCors(Response.json(
@@ -38,11 +35,23 @@ export async function action({ request }: ActionFunctionArgs) {
     const jobId = nanoid();
     const prompt = buildPrompt(style);
 
-    if (USE_REPLICATE) {
-      // TODO: Restore Replicate flow
-      // const prediction = await createPrediction(photo_url, prompt);
-      // await createJob({ ... replicateId: prediction.id, status: "processing" });
-      return withCors(Response.json({ error: "Replicate not enabled" }, { status: 503 }));
+    // Real Replicate mode: create prediction + async polling via job-status
+    if (generate) {
+      const { createPrediction } = await import("../utils/replicate.server");
+      const prediction = await createPrediction(photo_url, prompt);
+
+      await createJob({
+        id: jobId,
+        shop,
+        petPhotoUrl: photo_url,
+        paintingStyle: style,
+        prompt,
+        status: "processing",
+        replicateId: prediction.id,
+        resultUrl: null,
+      });
+
+      return withCors(Response.json({ job_id: jobId, status: "accepted" }));
     }
 
     // Mock mode: immediately complete with uploaded photo as result
