@@ -46,7 +46,7 @@ export function AuthLinks() {
           Hi, {displayName}
         </li>
         <li>
-          <a href="/api/auth/logout" className={linkClass}>
+          <a href={`/api/auth/logout?returnTo=${encodeURIComponent(pathname)}`} className={linkClass}>
             Logout
           </a>
         </li>

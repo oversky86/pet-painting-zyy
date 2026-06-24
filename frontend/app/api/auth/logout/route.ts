@@ -4,6 +4,7 @@ import { getOpenIDConfig } from "@/lib/customer-account";
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const origin = `${url.protocol}//${url.host}`;
+  const returnTo = url.searchParams.get("returnTo") || "/";
   const idToken = req.cookies.get("customer_id_token")?.value;
 
   // Clear all auth cookies
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     if (idToken) {
       endSessionUrl.searchParams.set("id_token_hint", idToken);
     }
-    endSessionUrl.searchParams.set("post_logout_redirect_uri", origin);
+    endSessionUrl.searchParams.set("post_logout_redirect_uri", `${origin}${returnTo}`);
     logoutUrl = endSessionUrl.toString();
   } catch {
     // Fallback: redirect to homepage

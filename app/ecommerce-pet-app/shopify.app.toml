@@ -56,4 +56,3 @@ redirect_uris = ["https://pet-paiting-frontend.vercel.app/api/auth/callback"]
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
