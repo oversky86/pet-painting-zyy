@@ -3,36 +3,66 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const SHOP_DOMAIN = process.env.NEXT_PUBLIC_SHOP_DOMAIN!;
+interface Customer {
+  firstName: string;
+  lastName: string;
+  emailAddress: { emailAddress: string };
+}
+
+const linkClass =
+  "text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors";
 
 export function AuthLinks() {
   const pathname = usePathname();
-  const [origin, setOrigin] = useState("");
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Avoid hydration mismatch: read window.origin only on client
   useEffect(() => {
-    setOrigin(window.location.origin);
+    let cancelled = false;
+    fetch("/api/auth/customer")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setCustomer(data.customer);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const returnUrl = encodeURIComponent(`${origin}${pathname}`);
-  const loginUrl = `https://${SHOP_DOMAIN}/account/login?return_url=${returnUrl}`;
-  const registerUrl = `https://${SHOP_DOMAIN}/account/register?return_url=${returnUrl}`;
+  if (loading) {
+    return <li className="text-sm text-[var(--color-muted)]">...</li>;
+  }
 
-  const linkClass =
-    "text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors";
+  if (customer) {
+    const displayName =
+      customer.firstName || customer.emailAddress?.emailAddress || "Account";
+    return (
+      <>
+        <li className="text-sm text-[var(--color-muted)]">
+          Hi, {displayName}
+        </li>
+        <li>
+          <a href="/api/auth/logout" className={linkClass}>
+            Logout
+          </a>
+        </li>
+      </>
+    );
+  }
 
+  const returnTo = encodeURIComponent(pathname);
   return (
-    <>
-      <li>
-        <a href={loginUrl} rel="noopener" className={linkClass}>
-          Login
-        </a>
-      </li>
-      <li>
-        <a href={registerUrl} rel="noopener" className={linkClass}>
-          Register
-        </a>
-      </li>
-    </>
+    <li>
+      <a
+        href={`/api/auth/login?returnTo=${returnTo}`}
+        className={linkClass}
+      >
+        Login
+      </a>
+    </li>
   );
 }
