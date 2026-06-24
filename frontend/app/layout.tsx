@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { AuthLinks } from "@/components/AuthLinks";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -95,24 +96,7 @@ export default function RootLayout({
                     Shop
                   </Link>
                 </li>
-                <li>
-                  <a
-                    href={`https://${process.env.NEXT_PUBLIC_SHOP_DOMAIN}/account/login`}
-                    rel="noopener"
-                    className="text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
-                  >
-                    Login
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={`https://${process.env.NEXT_PUBLIC_SHOP_DOMAIN}/account/register`}
-                    rel="noopener"
-                    className="text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
-                  >
-                    Register
-                  </a>
-                </li>
+                <AuthLinks />
                 <li>
                   <Link
                     href="/cart"
