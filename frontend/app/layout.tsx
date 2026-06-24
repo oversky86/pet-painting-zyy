@@ -96,6 +96,24 @@ export default function RootLayout({
                   </Link>
                 </li>
                 <li>
+                  <a
+                    href={`https://${process.env.NEXT_PUBLIC_SHOP_DOMAIN}/account/login`}
+                    rel="noopener"
+                    className="text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+                  >
+                    Login
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`https://${process.env.NEXT_PUBLIC_SHOP_DOMAIN}/account/register`}
+                    rel="noopener"
+                    className="text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
+                  >
+                    Register
+                  </a>
+                </li>
+                <li>
                   <Link
                     href="/cart"
                     className="text-sm text-[var(--color-muted)] hover:text-[var(--foreground)] transition-colors"
