@@ -1,0 +1,90 @@
+{
+  "sections": {
+    "main": {
+      "type": "piktura-faq",
+      "settings": {},
+      "blocks": {
+        "hl_1": { "type": "highlight", "settings": { "icon": "pen", "title": "Preview before shipping", "text": "You can review the finished creation before it is packed and sent out." } },
+        "hl_2": { "type": "highlight", "settings": { "icon": "package", "title": "Reasonable revisions included", "text": "Small refinements based on your original photo and approved direction are part of the process." } },
+        "hl_3": { "type": "highlight", "settings": { "icon": "lock", "title": "Your original photo stays private", "text": "We never publish your source photo. Finished artwork is only shared with your permission." } },
+        "fg_1": {
+          "type": "faq_group",
+          "settings": {
+            "group_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/04-faq-privacy.jpg",
+            "eyebrow": "Photos & Privacy",
+            "title": "Your source photo stays private from the start.",
+            "summary": "We use your upload only to create the custom artwork. Public sharing happens only if you approve it.",
+            "question_1": "Will my photo or final artwork be used publicly?",
+            "answer_1": "Your original photo is used only to create your custom artwork. We will never use your original photo publicly. If we would like to feature the finished artwork in our portfolio, website, social media, or marketing materials, we will ask for your approval first. Saying no is completely fine and will not affect your order.",
+            "question_2": "How is my photo stored and protected?",
+            "answer_2": "Your uploaded photo is stored securely and accessed only by the team working on your piece. We do not share your files with third parties or use them for any purpose beyond fulfilling your order.",
+            "question_3": "Can I delete my photo after the order is complete?",
+            "answer_3": "Yes. Once your order has been delivered, you may request that we remove your source photo from our systems."
+          }
+        },
+        "fg_2": {
+          "type": "faq_group",
+          "settings": {
+            "group_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/05-faq-preview.jpg",
+            "eyebrow": "Preview & Approval",
+            "title": "The preview guides the direction. The handmade finish brings it to life.",
+            "summary": "The preview is there to build confidence and alignment, not to promise a pixel-identical printout.",
+            "question_1": "Is the preview exactly the same as the final painting?",
+            "answer_1": "No. The preview is meant to show the creative direction, not an exact pixel-for-pixel final result. Because your artwork is handmade, natural differences in brushwork, texture, color, and artistic interpretation are part of the process.",
+            "question_2": "Will I be able to review the final artwork before it ships?",
+            "answer_2": "Yes. Before your artwork is shipped, you will have a chance to review the final creation and approve it.",
+            "question_3": "What if the preview doesn't match my expectations?",
+            "answer_3": "If the preview doesn't feel right, let us know what needs adjusting. We can refine the direction before the final piece moves forward."
+          }
+        },
+        "fg_3": {
+          "type": "faq_group",
+          "settings": {
+            "group_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/06-faq-revisions.jpg",
+            "eyebrow": "Revisions",
+            "title": "Reasonable refinements are part of the process.",
+            "summary": "Revisions help align the final piece with your original photo and chosen style.",
+            "question_1": "How many revisions are included?",
+            "answer_1": "We include reasonable revisions before your painting ships. This typically covers small adjustments to facial features, colors, background details, or other refinements that stay within the original order scope.",
+            "question_2": "What counts as a major change?",
+            "answer_2": "A major change is one that shifts the fundamental direction of the piece — for example, switching from a Classic Oil to an Impressionist style after production has started. Major changes may require additional time and may not always be possible.",
+            "question_3": "Can I request changes after the painting ships?",
+            "answer_3": "Once the artwork has shipped, revisions are no longer available. Please review the preview carefully and share all feedback before approving."
+          }
+        },
+        "fg_4": {
+          "type": "faq_group",
+          "settings": {
+            "group_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/07-faq-refunds.jpg",
+            "eyebrow": "Refunds & Cancellations",
+            "title": "Clear policy boundaries for every stage.",
+            "summary": "Flexibility changes depending on where the order is in production.",
+            "question_1": "Can I cancel my order?",
+            "answer_1": "You may cancel for a full refund before your artist starts working on the painting. Once production has started, the order can no longer be cancelled for a full refund.",
+            "question_2": "What if the painting arrives damaged?",
+            "answer_2": "If your painting arrives damaged or has a clear production defect, please contact us within 30 days of delivery with photos of the issue. We may offer a replacement, repair, or refund depending on the situation.",
+            "question_3": "How do I start a refund or replacement request?",
+            "answer_3": "Email our support team with your order number and clear photos of the issue. We will respond with next steps as quickly as possible."
+          }
+        },
+        "fg_5": {
+          "type": "faq_group",
+          "settings": {
+            "group_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/08-faq-quality.jpg",
+            "eyebrow": "Quality & Materials",
+            "title": "Built to last on the wall.",
+            "summary": "Premium materials and careful finishing make every piece gallery-ready.",
+            "question_1": "What materials are used?",
+            "answer_1": "We use premium stretched canvas, archival-grade inks, and hand-selected frames. Every piece is finished to hang and built to last.",
+            "question_2": "How should I care for the painting?",
+            "answer_2": "Keep the artwork out of direct sunlight, avoid high-humidity areas, and dust gently with a soft dry cloth. Proper care keeps the colors vivid for decades.",
+            "question_3": "Does the artwork come framed?",
+            "answer_3": "Yes. Every painting ships with your selected frame already mounted and ready to hang."
+          }
+        }
+      },
+      "block_order": ["hl_1", "hl_2", "hl_3", "fg_1", "fg_2", "fg_3", "fg_4", "fg_5"]
+    }
+  },
+  "order": ["main"]
+}

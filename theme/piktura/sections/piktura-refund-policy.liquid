@@ -1,0 +1,244 @@
+{% comment %}
+  Piktura Refund & Revision Policy Page Section
+  Matches RefundPolicy.tsx visual: hero, quick policies grid,
+  sticky sidebar + policy articles, disclaimer, bottom CTA.
+{% endcomment %}
+
+{%- comment -%} Hero {%- endcomment -%}
+<section class="pk-rp-hero">
+  <div class="pk-rp-hero__bg">
+    {%- if section.settings.hero_image != blank -%}
+      <img src="{{ section.settings.hero_image }}" alt="Finished framed portrait in a home" loading="eager" decoding="async" fetchpriority="high">
+    {%- endif -%}
+    <div class="pk-rp-hero__gradient"></div>
+  </div>
+  <div class="pk-rp-hero__content pk-reveal">
+    <p class="pk-eyebrow">{{ section.settings.hero_eyebrow | default: 'Refund & Revision Policy' }}</p>
+    <h1 class="pk-rp-hero__title">{{ section.settings.hero_title | default: 'Clear protection for a custom-made process.' }}</h1>
+    <p class="pk-rp-hero__text">{{ section.settings.hero_text | default: 'Every painting is created to order by an artist using your photo and selected details. This policy explains what can be changed, canceled, revised, or refunded at each stage.' }}</p>
+    <div class="pk-rp-hero__actions">
+      <a href="{{ routes.root_url }}products" class="pk-btn pk-btn--primary button-lift">{{ section.settings.cta_primary | default: 'Start Your Painting' }}</a>
+      <a href="{{ routes.root_url }}pages/faq" class="pk-btn pk-btn--secondary">{{ section.settings.cta_secondary | default: 'Visit FAQ' }}</a>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} Quick Policies Grid {%- endcomment -%}
+<section class="pk-rp-quick">
+  <div class="pk-rp-quick__grid">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'quick_policy' -%}
+        <article class="pk-rp-quick__card pk-reveal" {{ block.shopify_attributes }}>
+          <div class="pk-rp-quick__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              {%- case block.settings.icon -%}
+                {%- when 'dollar' -%}
+                  <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                {%- when 'brush' -%}
+                  <path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>
+                {%- when 'shield' -%}
+                  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
+                {%- else -%}
+                  <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+              {%- endcase -%}
+            </svg>
+          </div>
+          <h2 class="pk-rp-quick__title">{{ block.settings.title }}</h2>
+          <p class="pk-rp-quick__body">{{ block.settings.body }}</p>
+        </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{%- comment -%} Policy Details: Sticky Sidebar + Articles {%- endcomment -%}
+<section class="pk-rp-details">
+  <div class="pk-rp-details__layout">
+    {%- comment -%} Sticky Sidebar {%- endcomment -%}
+    <div class="pk-rp-details__sidebar">
+      <div class="pk-rp-details__intro pk-reveal">
+        <p class="pk-eyebrow">{{ section.settings.sidebar_eyebrow | default: 'How The Policy Works' }}</p>
+        <h2 class="pk-rp-details__intro-title">{{ section.settings.sidebar_title | default: 'The outcome depends on where the order is in production.' }}</h2>
+        <p class="pk-rp-details__intro-text">{{ section.settings.sidebar_text | default: 'The earlier you contact us, the more flexibility we have. Once an artist is already producing the piece, the policy shifts from cancellation toward revision and issue resolution.' }}</p>
+      </div>
+      <div class="pk-rp-contact-card pk-reveal">
+        {%- if section.settings.contact_image != blank -%}
+          <img src="{{ section.settings.contact_image }}" alt="Framed artwork in a room" loading="lazy" decoding="async">
+        {%- endif -%}
+        <div class="pk-rp-contact-card__body">
+          <p class="pk-eyebrow">{{ section.settings.contact_eyebrow | default: 'Contact Us' }}</p>
+          <h3 class="pk-rp-contact-card__title">{{ section.settings.contact_title | default: 'Need help with a change, issue, or refund request?' }}</h3>
+          <p class="pk-rp-contact-card__text">{{ section.settings.contact_text | default: 'To request a cancellation, revision, replacement, or refund, please contact us at:' }}</p>
+          <div class="pk-rp-contact-card__email">{{ section.settings.contact_email | default: 'support@piktura.com' }}</div>
+          <p class="pk-rp-contact-card__note">{{ section.settings.contact_note | default: 'Please include your order number so we can help you faster.' }}</p>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Policy Articles {%- endcomment -%}
+    <div class="pk-rp-details__articles">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'policy_section' -%}
+          <article class="pk-rp-article pk-reveal" {{ block.shopify_attributes }}>
+            <p class="pk-rp-article__eyebrow">{{ block.settings.eyebrow }}</p>
+            <h3 class="pk-rp-article__title">{{ block.settings.title }}</h3>
+            <div class="pk-rp-article__body">
+              {%- if block.settings.paragraph_1 != blank -%}<p>{{ block.settings.paragraph_1 }}</p>{%- endif -%}
+              {%- if block.settings.paragraph_2 != blank -%}<p>{{ block.settings.paragraph_2 }}</p>{%- endif -%}
+              {%- if block.settings.paragraph_3 != blank -%}<p>{{ block.settings.paragraph_3 }}</p>{%- endif -%}
+              {%- if block.settings.paragraph_4 != blank -%}<p>{{ block.settings.paragraph_4 }}</p>{%- endif -%}
+            </div>
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- comment -%} Disclaimer {%- endcomment -%}
+      <section class="pk-rp-disclaimer pk-reveal">
+        <div class="pk-rp-disclaimer__layout">
+          <div class="pk-rp-disclaimer__content">
+            <p class="pk-rp-article__eyebrow">{{ section.settings.disclaimer_eyebrow | default: 'Handmade Artwork Disclaimer' }}</p>
+            <h3 class="pk-rp-disclaimer__title">{{ section.settings.disclaimer_title | default: 'Handmade variation is part of the value, not a production flaw.' }}</h3>
+            <div class="pk-rp-disclaimer__body">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'disclaimer_note' -%}
+                  <p>{{ block.settings.note }}</p>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+            <div class="pk-rp-disclaimer__callout">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              <p>{{ section.settings.disclaimer_callout | default: 'Small differences in texture, brush character, and screen-to-real color are normal in a handmade piece and are not considered defects on their own.' }}</p>
+            </div>
+          </div>
+          <div class="pk-rp-disclaimer__image">
+            {%- if section.settings.disclaimer_image != blank -%}
+              <img src="{{ section.settings.disclaimer_image }}" alt="Packaging and finishing materials" loading="lazy" decoding="async">
+            {%- endif -%}
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} Bottom CTA {%- endcomment -%}
+<section class="pk-rp-cta">
+  <div class="pk-rp-cta__layout">
+    <div class="pk-rp-cta__content pk-reveal">
+      <p class="pk-eyebrow">{{ section.settings.bottom_eyebrow | default: 'Next Step' }}</p>
+      <h2 class="pk-rp-cta__title">{{ section.settings.bottom_title | default: 'Start the preview flow with the policy already clear.' }}</h2>
+      <p class="pk-rp-cta__text">{{ section.settings.bottom_text | default: 'The smoother the expectations, the calmer the order feels. Explore directions first, then move forward knowing how revisions and refunds are handled.' }}</p>
+    </div>
+    <a href="{{ routes.root_url }}products" class="pk-btn pk-btn--primary button-lift pk-rp-cta__button">
+      {{ section.settings.bottom_cta | default: 'Open The Gallery' }}
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Refund Policy",
+  "tag": "section",
+  "class": "pk-refund-policy",
+  "settings": [
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_image", "label": "Hero background image URL" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow", "default": "Refund & Revision Policy" },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Clear protection for a custom-made process." },
+    { "type": "textarea", "id": "hero_text", "label": "Hero description", "default": "Every painting is created to order by an artist using your photo and selected details. This policy explains what can be changed, canceled, revised, or refunded at each stage." },
+    { "type": "text", "id": "cta_primary", "label": "Primary CTA text", "default": "Start Your Painting" },
+    { "type": "text", "id": "cta_secondary", "label": "Secondary CTA text", "default": "Visit FAQ" },
+    { "type": "header", "content": "Sidebar" },
+    { "type": "text", "id": "sidebar_eyebrow", "label": "Sidebar eyebrow", "default": "How The Policy Works" },
+    { "type": "text", "id": "sidebar_title", "label": "Sidebar title", "default": "The outcome depends on where the order is in production." },
+    { "type": "textarea", "id": "sidebar_text", "label": "Sidebar text", "default": "The earlier you contact us, the more flexibility we have. Once an artist is already producing the piece, the policy shifts from cancellation toward revision and issue resolution." },
+    { "type": "header", "content": "Contact Card" },
+    { "type": "text", "id": "contact_image", "label": "Contact card image URL" },
+    { "type": "text", "id": "contact_eyebrow", "label": "Contact eyebrow", "default": "Contact Us" },
+    { "type": "text", "id": "contact_title", "label": "Contact title", "default": "Need help with a change, issue, or refund request?" },
+    { "type": "textarea", "id": "contact_text", "label": "Contact text", "default": "To request a cancellation, revision, replacement, or refund, please contact us at:" },
+    { "type": "text", "id": "contact_email", "label": "Support email", "default": "support@piktura.com" },
+    { "type": "text", "id": "contact_note", "label": "Contact note", "default": "Please include your order number so we can help you faster." },
+    { "type": "header", "content": "Disclaimer" },
+    { "type": "text", "id": "disclaimer_eyebrow", "label": "Disclaimer eyebrow", "default": "Handmade Artwork Disclaimer" },
+    { "type": "text", "id": "disclaimer_title", "label": "Disclaimer title", "default": "Handmade variation is part of the value, not a production flaw." },
+    { "type": "textarea", "id": "disclaimer_callout", "label": "Disclaimer callout", "default": "Small differences in texture, brush character, and screen-to-real color are normal in a handmade piece and are not considered defects on their own." },
+    { "type": "text", "id": "disclaimer_image", "label": "Disclaimer image URL" },
+    { "type": "header", "content": "Bottom CTA" },
+    { "type": "text", "id": "bottom_eyebrow", "label": "Bottom eyebrow", "default": "Next Step" },
+    { "type": "text", "id": "bottom_title", "label": "Bottom title", "default": "Start the preview flow with the policy already clear." },
+    { "type": "textarea", "id": "bottom_text", "label": "Bottom text", "default": "The smoother the expectations, the calmer the order feels. Explore directions first, then move forward knowing how revisions and refunds are handled." },
+    { "type": "text", "id": "bottom_cta", "label": "Bottom CTA text", "default": "Open The Gallery" }
+  ],
+  "blocks": [
+    {
+      "type": "quick_policy",
+      "name": "Quick Policy Card",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "options": [
+          { "value": "dollar", "label": "Dollar (Cancel)" },
+          { "value": "brush", "label": "Brush (Revisions)" },
+          { "value": "shield", "label": "Shield (Protection)" }
+        ], "default": "dollar" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Cancel before painting begins" },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "Before the artist starts, the order can be canceled for a full refund." }
+      ]
+    },
+    {
+      "type": "policy_section",
+      "name": "Policy Section",
+      "settings": [
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Section Label" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Section title goes here." },
+        { "type": "textarea", "id": "paragraph_1", "label": "Paragraph 1" },
+        { "type": "textarea", "id": "paragraph_2", "label": "Paragraph 2" },
+        { "type": "textarea", "id": "paragraph_3", "label": "Paragraph 3" },
+        { "type": "textarea", "id": "paragraph_4", "label": "Paragraph 4" }
+      ]
+    },
+    {
+      "type": "disclaimer_note",
+      "name": "Disclaimer Note",
+      "settings": [
+        { "type": "textarea", "id": "note", "label": "Note paragraph", "default": "Each painting is handmade, so small variations in brushwork, texture, and artistic interpretation are part of the custom artwork process. These natural differences are not considered defects." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Refund Policy",
+      "blocks": {
+        "qp_1": { "type": "quick_policy", "settings": { "icon": "dollar", "title": "Cancel before painting begins", "body": "Before the artist starts, the order can be canceled for a full refund." } },
+        "qp_2": { "type": "quick_policy", "settings": { "icon": "brush", "title": "Free revisions before shipping", "body": "Reasonable refinements are included while the final artwork is still being reviewed." } },
+        "qp_3": { "type": "quick_policy", "settings": { "icon": "shield", "title": "30-day protection for damage or defects", "body": "If the artwork arrives damaged or clearly defective, contact us within 30 days of delivery." } },
+        "ps_1": { "type": "policy_section", "settings": {
+          "eyebrow": "Cancellation Before Painting Begins",
+          "title": "Full refund before the artist starts.",
+          "paragraph_1": "You may cancel your order for a full refund before your artist starts working on the painting.",
+          "paragraph_2": "Once the artist has started, the order is considered in production and can no longer be cancelled for a full refund."
+        }},
+        "ps_2": { "type": "policy_section", "settings": {
+          "eyebrow": "Free Revisions Before Shipping",
+          "title": "Refine the details while the piece is still in progress.",
+          "paragraph_1": "We offer free revisions before your painting is shipped.",
+          "paragraph_2": "If we share a preview before shipping, you may request reasonable adjustments to help the artwork better match your original photo and order request.",
+          "paragraph_3": "This may include details such as facial features, colors, background, or other small refinements.",
+          "paragraph_4": "Major changes outside the original order request may require additional time and may not always be possible."
+        }},
+        "ps_3": { "type": "policy_section", "settings": {
+          "eyebrow": "Damage or Defect Within 30 Days",
+          "title": "A separate resolution path for verified issues.",
+          "paragraph_1": "If your painting arrives damaged or has a clear production defect, please contact us within 30 days of delivery.",
+          "paragraph_2": "After reviewing the issue, we may offer a replacement, repair, or refund depending on the situation.",
+          "paragraph_3": "Please include your order number and clear photos of the issue. If the package was damaged during shipping, please also include photos of the packaging."
+        }},
+        "dn_1": { "type": "disclaimer_note", "settings": { "note": "Each painting is handmade, so small variations in brushwork, texture, and artistic interpretation are part of the custom artwork process. These natural differences are not considered defects." } },
+        "dn_2": { "type": "disclaimer_note", "settings": { "note": "Color may also appear slightly different in person than on a screen due to display settings and lighting conditions." } }
+      },
+      "block_order": ["qp_1", "qp_2", "qp_3", "ps_1", "ps_2", "ps_3", "dn_1", "dn_2"]
+    }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

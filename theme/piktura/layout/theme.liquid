@@ -1,21 +1,13 @@
 <!doctype html>
 <html lang="{{ request.locale.iso_code }}">
   <head>
+    {% comment %} Google Fonts: Inter, Playfair Display, Space Grotesk {% endcomment %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     {% # Inlined CSS Variables %}
     {% render 'css-variables' %}
-
-    {% comment %}
-      Font preloading:
-      1. Preconnect to font CDN for faster connection
-      2. Preload only the critical font variant (base weight)
-      3. Additional variants load on-demand via @font-face
-    {% endcomment %}
-    {% unless settings.type_primary_font.system? %}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-
-      {% comment %} Preload the base font variant for initial page render {% endcomment %}
-      {{ settings.type_primary_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
-    {% endunless %}
 
     {% # Load and preload the critical CSS %}
     {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
@@ -23,13 +15,21 @@
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
 
+    {% # BreadcrumbList structured data for product pages %}
+    {% render 'product-json-ld' %}
+
     {{ content_for_header }}
+    <script src="{{ 'piktura-global.js' | asset_url }}" defer></script>
   </head>
 
   <body>
-    {% sections 'header-group' %}
+    {% unless template == 'product' %}
+      {% sections 'header-group' %}
+    {% endunless %}
 
-    {{ content_for_layout }}
+    <main id="MainContent" {% unless template == 'product' %}style="padding-top: 64px;"{% endunless %}>
+      {{ content_for_layout }}
+    </main>
 
     {% sections 'footer-group' %}
   </body>

@@ -1,50 +1,1164 @@
 {% comment %}
-  This section is used in the product template to render product page with
-  media, content, and add-to-cart form.
+  Piktura Product Customizer — Create Page
+  Matches Create.tsx visual: sidebar (upload/style/size/frame) | canvas preview | summary panel.
+  BUILD:v7-cdn-hardcoded
+  Mobile: sticky preview + scrolling controls + fixed bottom CTA.
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/product
+  Data attributes for JS: [data-customizer], [data-upload-zone], [data-style-grid], etc.
 {% endcomment %}
 
-<div class="product-images">
-  {% for image in product.images %}
-    {% render 'image', class: 'product-image', image: image %}
-  {% endfor %}
+<!-- PIKTURA_BUILD_v13 -->
+{%- comment -%} Hidden file input for upload {%- endcomment -%}
+<input
+  type="file"
+  accept="image/png,image/jpeg,image/webp"
+  data-file-input
+  class="sr-only"
+  aria-hidden="true"
+  tabindex="-1"
+>
+
+{%- comment -%} Desktop step bar {%- endcomment -%}
+<div class="pk-step-bar-wrapper">
+  <div class="pk-step-bar-inner">
+    <a href="{{ routes.root_url }}" class="pk-back-btn pk-step-bar__back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      <span>Back to Home</span>
+    </a>
+    <nav class="pk-step-bar" aria-label="Creation steps">
+      <span class="pk-step-bar__step pk-step-bar__step--active" data-step-indicator="create">01 Create</span>
+      <span class="pk-step-bar__sep" aria-hidden="true">—</span>
+      <span class="pk-step-bar__step" data-step-indicator="preview">02 Preview</span>
+      <span class="pk-step-bar__sep" aria-hidden="true">—</span>
+      <span class="pk-step-bar__step" data-step-indicator="details">03 Details</span>
+      <span class="pk-step-bar__sep" aria-hidden="true">—</span>
+      <span class="pk-step-bar__step" data-step-indicator="checkout">04 Checkout</span>
+    </nav>
+  </div>
 </div>
 
-<div class="product-info">
-  <h1>{{ product.title }}</h1>
-  <p>{{ product.price | money }}</p>
-  <p>{{ product.description }}</p>
+{%- comment -%} Main customizer {%- endcomment -%}
+<div
+  class="pk-create"
+  data-customizer
+  data-app-url="{{ settings.app_url }}"
+  data-shop-domain="{{ shop.permanent_domain }}"
+  data-use-real-generation="{{ settings.use_real_generation }}"
+>
+  {%- comment -%} ─── DESKTOP LAYOUT ─── {%- endcomment -%}
+  <div class="pk-customizer-main" data-customizer-main>
+  <div class="pk-desktop-create" style="flex:1;min-width:0;">
+
+    {%- comment -%} Left: Sidebar controls {%- endcomment -%}
+    <div class="pk-create__sidebar">
+      <div class="pk-sidebar-card">
+
+        {%- comment -%} 1. Upload {%- endcomment -%}
+        <div class="pk-sidebar-section">
+          <p class="pk-sidebar-label">1. Your Photo</p>
+          <div class="pk-upload-zone" data-upload-zone role="button" tabindex="0" aria-label="Upload pet photo">
+            <p class="pk-eyebrow-sm" style="text-align:center;">Studio Upload</p>
+            <h4 style="margin-top:0.25rem;text-align:center;font-size:1.05rem;font-weight:600;color:#1a1a1a;">Upload Your Pet's Photo</h4>
+
+            {%- comment -%} No upload state {%- endcomment -%}
+            <div data-upload-empty>
+              <button type="button" class="pk-upload-zone" data-upload-trigger style="margin-top:1rem;width:100%;">
+                <div class="pk-upload-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                </div>
+                <p class="pk-upload-text">Start with one clear pet photo.</p>
+              </button>
+              <button type="button" class="pk-upload-btn" data-upload-trigger>browse files</button>
+            </div>
+
+            {%- comment -%} Uploaded state {%- endcomment -%}
+            <div data-upload-preview hidden>
+              <div class="pk-upload-preview">
+                <div class="pk-upload-preview__overlay">
+                  <img class="pk-upload-preview__img" data-upload-image src="" alt="Uploaded pet photo" loading="lazy" decoding="async">
+                </div>
+              </div>
+
+              {%- comment -%} Generate button {%- endcomment -%}
+              <button type="button" class="pk-btn pk-btn--generate pk-btn--full" data-generate-btn disabled style="margin-top:1rem;padding:0.75rem 1rem;gap:0.75rem;">
+                <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.12);color:white;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.21 1.21 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+                </span>
+                <span data-generate-label>Generate Preview</span>
+              </button>
+
+              <button type="button" class="pk-upload-change-btn" data-upload-change>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                Change Photo
+              </button>
+            </div>
+
+            <p class="pk-error-text" data-upload-error hidden role="alert"></p>
+            <div aria-live="polite" class="sr-only" data-upload-status></div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(0,0,0,0.06);margin:0;">
+
+        {%- comment -%} 2. Style {%- endcomment -%}
+        <div class="pk-sidebar-section">
+          <p class="pk-sidebar-label">2. Choose Style</p>
+          <div class="pk-style-grid" role="radiogroup" aria-label="Painting style" data-style-grid>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'painting_style' -%}
+                {%- assign _si = '' -%}
+                {%- case block.settings.style_key -%}
+                  {%- when 'classic', 'classic-oil' -%}{%- assign _si = 'style-classic.png' | asset_url -%}
+                  {%- when 'impressionist' -%}{%- assign _si = 'style-impressionist.png' | asset_url -%}
+                  {%- when 'warm', 'warm-painterly' -%}{%- assign _si = 'style-warm.png' | asset_url -%}
+                  {%- when 'minimal', 'modern-minimal' -%}{%- assign _si = 'style-minimal.png' | asset_url -%}
+                {%- endcase -%}
+                <button
+                  type="button"
+                  class="pk-style-card"
+                  role="radio"
+                  aria-checked="false"
+                  data-style-key="{{ block.settings.style_key }}"
+                  data-style-image="{{ _si }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <div style="position:relative;overflow:hidden;">
+                    {%- if _si != blank -%}
+                      <img class="pk-style-card__img" src="{{ _si }}" alt="{{ block.settings.style_name }}" loading="lazy" decoding="async">
+                    {%- else -%}
+                      <div class="pk-style-card__img" style="background:#d4c4a8;display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;">
+                        <span style="font-size:2.5rem;" aria-hidden="true">&#127912;</span>
+                      </div>
+                    {%- endif -%}
+                    <div class="pk-style-card__gradient"></div>
+                    <div class="pk-style-card__check">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                  </div>
+                  <div class="pk-style-card__info">
+                    <h4 class="pk-style-card__title">{{ block.settings.style_name }}</h4>
+                  </div>
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(0,0,0,0.06);margin:0;">
+
+        {%- comment -%} 3. Size {%- endcomment -%}
+        <div class="pk-sidebar-section">
+          <p class="pk-sidebar-label">3. Size</p>
+          <select class="pk-size-select" data-size-select>
+            {%- assign has_size_option = false -%}
+            {%- for option in product.options_with_values -%}
+              {%- assign option_name_lower = option.name | downcase -%}
+              {%- if option_name_lower == 'size' -%}
+                {%- assign has_size_option = true -%}
+                {%- for val in option.values -%}
+                  <option value="{{ val }}" {%- if forloop.first %} selected{% endif %}>{{ val }}</option>
+                {%- endfor -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- unless has_size_option -%}
+              <option value="portrait-40x50" selected>Portrait · 40 x 50 cm</option>
+              <option value="portrait-60x75">Portrait · 60 x 75 cm</option>
+              <option value="landscape-75x60">Landscape · 75 x 60 cm</option>
+              <option value="landscape-100x80">Landscape · 100 x 80 cm</option>
+              <option value="square-60x60">Square · 60 x 60 cm</option>
+              <option value="custom-size">Custom Size</option>
+            {%- endunless -%}
+          </select>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(0,0,0,0.06);margin:0;">
+
+        {%- comment -%} 4. Frame {%- endcomment -%}
+        <div class="pk-sidebar-section">
+          <p class="pk-sidebar-label">4. Frame</p>
+          <div class="pk-frame-grid" data-frame-grid>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'frame_option' -%}
+                {%- assign _fi = '' -%}
+                {%- case block.settings.frame_key -%}
+                  {%- when 'gold' -%}{%- assign _fi = 'frame-gold.webp' | asset_url -%}
+                  {%- when 'antique-gold' -%}{%- assign _fi = 'frame-antique-gold.webp' | asset_url -%}
+                  {%- when 'walnut' -%}{%- assign _fi = 'frame-walnut.webp' | asset_url -%}
+                  {%- when 'natural-wood' -%}{%- assign _fi = 'frame-natural-wood.webp' | asset_url -%}
+                  {%- when 'black' -%}{%- assign _fi = 'frame-black.webp' | asset_url -%}
+                {%- endcase -%}
+                <button
+                  type="button"
+                  class="pk-frame-card"
+                  data-frame-key="{{ block.settings.frame_key }}"
+                  data-frame-gradient="{{ block.settings.frame_gradient }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <div style="position:relative;overflow:hidden;">
+                    {%- if _fi != blank -%}
+                      <img class="pk-frame-card__img" src="{{ _fi }}" alt="{{ block.settings.frame_name }}" loading="lazy" decoding="async">
+                    {%- else -%}
+                      <div class="pk-frame-card__img" style="background:{{ block.settings.frame_gradient }};aspect-ratio:4/3;"></div>
+                    {%- endif -%}
+                    <div class="pk-frame-card__check">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                  </div>
+                  <div class="pk-frame-card__label">{{ block.settings.frame_name }}</div>
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {%- comment -%} Center: Canvas Preview Area {%- endcomment -%}
+    <div class="pk-create__canvas-area" data-preview-container style="position:relative;min-height:400px;padding:3rem;display:flex;align-items:center;justify-content:center;overflow:visible;background-color:#f7efdf;background-image:linear-gradient(180deg,#fcf7ee 0%,#f7ecd9 48%,#f0e0c2 100%);flex:1;align-self:stretch;">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 24% 24%,rgba(255,252,245,0.72),transparent 34%),radial-gradient(circle at 74% 34%,rgba(233,209,163,0.18),transparent 40%),linear-gradient(180deg,rgba(255,251,242,0.16),rgba(230,204,156,0.12));pointer-events:none;"></div>
+      {%- comment -%} Canvas view {%- endcomment -%}
+      <div data-canvas-view style="position:relative;width:100%;display:flex;justify-content:center;">
+        <div class="pk-frame pk-frame--aspect-portrait" data-preview-frame style="width:min(62%, 572px);margin:0 auto;">
+          {%- comment -%} Frame texture overlay {%- endcomment -%}
+          <div class="pk-frame__texture" data-frame-texture></div>
+          <div class="pk-frame__sheen"></div>
+          <div class="pk-frame__inner-sheen"></div>
+          <div class="pk-frame__inner-border">
+            <div class="pk-frame__inner-frame">
+              <div class="pk-frame__mat">
+                <div class="pk-frame__canvas" data-canvas-area>
+                  {%- comment -%} Empty placeholder {%- endcomment -%}
+                  <div class="pk-canvas-placeholder" data-preview-empty>
+                    <div class="pk-canvas-placeholder__inner">
+                      <img src="{{ 'create_placeholder_option_b_20260628.png' | asset_url }}" alt="Quiet canvas illustration" style="width:152px;max-width:44%;height:auto;margin:0 auto;display:block;" loading="lazy" decoding="async">
+                      <div class="pk-canvas-placeholder__divider"></div>
+                      <p class="pk-canvas-placeholder__label">Quiet Canvas State</p>
+                      <p class="pk-canvas-placeholder__title">Awaiting the first brushstroke</p>
+                      <p class="pk-canvas-placeholder__desc">The frame stays intentionally calm so the generation moment feels more dramatic.</p>
+                    </div>
+                  </div>
+
+                  {%- comment -%} Uploaded reference (blurred) {%- endcomment -%}
+                  <div data-preview-reference hidden style="position:absolute;inset:0;">
+                    <img data-reference-image src="" alt="Uploaded reference" style="width:100%;height:100%;object-fit:cover;transform:scale(1.04);filter:blur(4px) saturate(0.82) brightness(1.04) contrast(0.94);">
+                    <div class="pk-ref-overlay">
+                      <div class="pk-ref-overlay__badge">
+                        <div class="pk-ref-overlay__badge-inner">Reference Loaded</div>
+                      </div>
+                      <div class="pk-ref-overlay__hint">
+                        <div class="pk-ref-overlay__hint-inner">
+                          <p class="pk-ref-overlay__hint-label">Next step</p>
+                          <p class="pk-ref-overlay__hint-text">Choose a style, then generate your first preview.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {%- comment -%} Generated result {%- endcomment -%}
+                  <img data-preview-image src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.7s;display:none;" hidden>
+
+                  <div style="position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(67,46,23,0.12),inset 0 18px 24px rgba(255,255,255,0.04),inset 0 -10px 18px rgba(0,0,0,0.04);pointer-events:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:22px;right:22px;top:11px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,249,238,0.26),rgba(168,138,102,0.14),transparent);pointer-events:none;z-index:1;"></div>
+          <div style="position:absolute;left:14px;right:14px;bottom:8px;height:32px;background:linear-gradient(to bottom,transparent,rgba(90,68,46,0.04),rgba(54,39,26,0.12));pointer-events:none;z-index:1;"></div>
+
+          {%- comment -%} Generation overlay {%- endcomment -%}
+          <div class="pk-gen-overlay" data-preview-generating hidden>
+            <video class="pk-gen-overlay__video" src="{{ 'generation-motion-graphics.mp4' | asset_url }}" autoplay loop muted playsinline></video>
+            <div class="pk-gen-overlay__bg"></div>
+            <div class="pk-gen-overlay__card">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem;">
+                <div style="min-width:0;flex:1;">
+                  <p class="pk-gen-overlay__label">Generation Progress</p>
+                  <p class="pk-gen-overlay__title">Your portrait is taking shape.</p>
+                  <p class="pk-gen-overlay__phase" data-generation-phase>Sketching silhouette and expression</p>
+                </div>
+                <div class="pk-gen-overlay__percent" data-progress-text>0%</div>
+              </div>
+              <div style="margin-top:0.75rem;">
+                <div class="pk-gen-overlay__progress-label">
+                  <span>Studio in progress</span>
+                </div>
+                <div class="pk-gen-overlay__progress-bar">
+                  <div class="pk-gen-overlay__progress-fill" data-progress-fill role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
+                  <div class="pk-gen-shimmer"></div>
+                </div>
+              </div>
+            </div>
+            <div class="pk-gen-overlay__glow"></div>
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} Room view (hidden by default) {%- endcomment -%}
+      <div class="pk-room-view" data-room-view hidden>
+        <img class="pk-room-view__bg" src="" data-room-image alt="Room background">
+        <div class="pk-room-view__artwork" data-room-artwork style="top:22%;width:20%;min-width:200px;max-width:300px;left:57%;">
+          <div class="pk-frame pk-frame--aspect-portrait" data-room-frame>
+            <div class="pk-frame__texture" data-room-frame-texture></div>
+            <div class="pk-frame__sheen"></div>
+            <div class="pk-frame__inner-sheen"></div>
+            <div class="pk-frame__inner-border">
+              <div class="pk-frame__inner-frame">
+                <div class="pk-frame__mat">
+                  <div class="pk-frame__canvas">
+                    <img data-room-canvas-image src="" alt="Canvas in room" style="width:100%;height:100%;object-fit:cover;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} View toggle (appears after generation) {%- endcomment -%}
+      <div data-view-toggle hidden style="position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:10;">
+        <div class="pk-view-toggle">
+          <button type="button" class="pk-view-toggle__btn pk-view-toggle__btn--active" data-view-btn="canvas">Canvas</button>
+          <button type="button" class="pk-view-toggle__btn" data-view-btn="room">Room</button>
+        </div>
+      </div>
+
+      <div aria-live="polite" class="sr-only" data-preview-status></div>
+    </div>
+
+    {%- comment -%} Right: Summary Panel (shown after generation) {%- endcomment -%}
+    <div class="pk-create__summary" data-summary-panel hidden>
+      <div class="pk-summary-card">
+        <h3 class="pk-summary-card__title">Your Selections</h3>
+
+        <dl style="display:flex;flex-direction:column;gap:0.75rem;font-size:14px;">
+          <div class="pk-summary-card__row">
+            <dt>Style</dt>
+            <dd data-summary-style>—</dd>
+          </div>
+          <div class="pk-summary-card__row">
+            <dt>Size</dt>
+            <dd data-summary-size>—</dd>
+          </div>
+          <div class="pk-summary-card__row">
+            <dt>Frame</dt>
+            <dd data-summary-frame>—</dd>
+          </div>
+          <div class="pk-summary-card__row">
+            <dt>Preview</dt>
+            <dd data-summary-preview>Not started</dd>
+          </div>
+        </dl>
+
+        <div class="pk-summary-card__price">
+          <span class="pk-summary-card__price-label">All-in Price</span>
+          <span class="pk-summary-card__price-value" data-summary-price>{{ product.price | money }}</span>
+        </div>
+        <p class="pk-summary-card__includes" data-summary-compare hidden></p>
+        <p class="pk-summary-card__includes">Includes AI preview, painting, & shipping.</p>
+
+        {% comment %} Selling Plan (Deposit) Options {% endcomment %}
+        {% if product.selling_plan_groups.size > 0 %}
+          <fieldset class="pk-selling-plan" style="border:none;padding:0;margin:0.75rem 0 0;">
+            <legend style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--pk-text, #2a2a2a);">Payment Options</legend>
+            <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--pk-border, #e0e0e0);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;" class="pk-selling-plan-option" data-plan-option="">
+              <input type="radio" name="selling_plan" value="" style="accent-color:var(--pk-accent, #8b6e4e);">
+              <span>Pay in full — <span data-full-price>{{ product.price | money }}</span></span>
+            </label>
+            {% for group in product.selling_plan_groups %}
+              {% for plan in group.selling_plans %}
+                {% assign deposit_pct = plan.checkout_charge.value %}
+                <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--pk-accent, #8b6e4e);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;background:rgba(139,110,78,0.06);" class="pk-selling-plan-option pk-selling-plan-option--active" data-plan-option="{{ plan.id }}">
+                  <input type="radio" name="selling_plan" value="{{ plan.id }}" checked style="accent-color:var(--pk-accent, #8b6e4e);">
+                  <span data-deposit-label data-deposit-pct="{{ deposit_pct }}" data-plan-name="{{ plan.name }}">{{ plan.name }} — Pay {{ deposit_pct }}% now, balance on shipment</span>
+                </label>
+              {% endfor %}
+            {% endfor %}
+          </fieldset>
+        {% endif %}
+
+        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:0.5rem;">
+          <button type="button" class="pk-btn pk-btn--primary pk-btn--full button-lift" data-checkout-btn disabled style="padding:1rem;font-size:16px;box-shadow:0 12px 24px rgba(49,39,31,0.12);">
+            Continue to Details
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.7;transform:rotate(-90deg);"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button type="button" class="pk-btn pk-btn--ghost" data-save-later style="width:100%;font-size:14px;">Save for later</button>
+        </div>
+
+        <div class="pk-summary-card__trust">
+          <div class="pk-summary-card__trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Free AI preview & revisions</span>
+          </div>
+          <div class="pk-summary-card__trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Hand-painted by real artists</span>
+          </div>
+          <div class="pk-summary-card__trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Museum-quality materials</span>
+          </div>
+          <div class="pk-summary-card__trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>100% satisfaction guarantee</span>
+          </div>
+        </div>
+
+        <div class="pk-summary-card__footer">
+          <div class="pk-summary-card__footer-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span style="font-family:var(--font-serif);">Handcrafted with heart.</span>
+          </div>
+          <p class="pk-summary-card__footer-text">Each painting is carefully hand-crafted by our artists and packaged to arrive safely at your door.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ─── MOBILE LAYOUT ─── {%- endcomment -%}
+  <div class="pk-mobile-create">
+
+    {%- comment -%} Mobile header with back + view toggle {%- endcomment -%}
+    <div style="border-bottom:1px solid #E5E1D8;background:#F1EFE9;">
+      <div style="max-width:1600px;margin:0 auto;padding:1rem;display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem;">
+          <a href="{{ routes.root_url }}" class="pk-back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <span>Back to Home</span>
+          </a>
+          <div class="pk-view-toggle" data-mobile-view-toggle>
+            <button type="button" class="pk-view-toggle__btn pk-view-toggle__btn--active" data-mobile-view-btn="canvas">Canvas</button>
+            <button type="button" class="pk-view-toggle__btn" data-mobile-view-btn="room" disabled>Room</button>
+          </div>
+        </div>
+
+        {%- comment -%} Mobile progress steps {%- endcomment -%}
+        <div class="pk-mobile-steps">
+          <div class="pk-mobile-steps__row">
+            <div class="pk-mobile-steps__dot pk-mobile-steps__dot--active" data-mobile-step="0">01</div>
+            <div class="pk-mobile-steps__line"><div class="pk-mobile-steps__line-fill" data-mobile-line="0"></div></div>
+            <div class="pk-mobile-steps__dot" data-mobile-step="1">02</div>
+            <div class="pk-mobile-steps__line"><div class="pk-mobile-steps__line-fill" data-mobile-line="1"></div></div>
+            <div class="pk-mobile-steps__dot" data-mobile-step="2">03</div>
+          </div>
+          <div class="pk-mobile-steps__labels">
+            <span class="pk-mobile-steps__label pk-mobile-steps__label--active" data-mobile-label="0">Create</span>
+            <span class="pk-mobile-steps__label" data-mobile-label="1">Preview</span>
+            <span class="pk-mobile-steps__label" data-mobile-label="2">Details</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Mobile sticky preview {%- endcomment -%}
+    <div class="pk-mobile-preview" data-mobile-preview>
+      <div class="pk-mobile-preview__frame">
+        <div style="position:relative;width:100%;display:flex;align-items:center;justify-content:center;min-height:43svh;">
+          {%- comment -%} Canvas view (mobile) {%- endcomment -%}
+          <div data-mobile-canvas-view style="width:min(72%,360px);margin:0 auto;">
+            <div class="pk-frame pk-frame--aspect-portrait" data-mobile-preview-frame>
+              <div class="pk-frame__texture" data-mobile-frame-texture></div>
+              <div class="pk-frame__sheen"></div>
+              <div class="pk-frame__inner-sheen"></div>
+              <div class="pk-frame__inner-border">
+                <div class="pk-frame__inner-frame">
+                  <div class="pk-frame__mat">
+                    <div class="pk-frame__canvas" data-mobile-canvas-area>
+                      <div class="pk-canvas-placeholder" data-mobile-preview-empty>
+                        <div class="pk-canvas-placeholder__inner" style="max-width:100%;padding:0 1rem;">
+                          <img src="{{ 'create_placeholder_option_b_20260628.png' | asset_url }}" alt="Quiet canvas illustration" style="width:88px;max-width:44%;height:auto;margin:0 auto;display:block;opacity:0.5;" loading="lazy" decoding="async">
+                          <div class="pk-canvas-placeholder__divider"></div>
+                          <p class="pk-canvas-placeholder__label" style="font-size:9px;">Quiet Canvas</p>
+                          <p class="pk-canvas-placeholder__title" style="font-size:clamp(0.9rem,2.5vw,1.1rem);">Awaiting the first brushstroke</p>
+                        </div>
+                      </div>
+                      <div data-mobile-preview-reference hidden style="position:absolute;inset:0;">
+                        <img data-mobile-reference-image src="" alt="Reference" style="width:100%;height:100%;object-fit:cover;transform:scale(1.04);filter:blur(4px) saturate(0.82) brightness(1.04) contrast(0.94);">
+                        <div class="pk-ref-overlay">
+                          <div class="pk-ref-overlay__badge"><div class="pk-ref-overlay__badge-inner">Reference Loaded</div></div>
+                          <div class="pk-ref-overlay__hint">
+                            <div class="pk-ref-overlay__hint-inner">
+                              <p class="pk-ref-overlay__hint-label">Next step</p>
+                              <p class="pk-ref-overlay__hint-text">Choose a style, then generate.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <img data-mobile-preview-image src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;" hidden>
+                      <div style="position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(67,46,23,0.12);pointer-events:none;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {%- comment -%} Mobile generation overlay {%- endcomment -%}
+              <div class="pk-gen-overlay" data-mobile-preview-generating hidden>
+                <video class="pk-gen-overlay__video" src="{{ 'generation-motion-graphics.mp4' | asset_url }}" autoplay loop muted playsinline></video>
+                <div class="pk-gen-overlay__bg"></div>
+                <div class="pk-gen-overlay__card" style="left:4%;right:4%;bottom:6%;">
+                  <p class="pk-gen-overlay__label">Generating</p>
+                  <p class="pk-gen-overlay__title" style="font-size:clamp(0.88rem,1.5vw,1.2rem);">Your portrait is taking shape.</p>
+                  <div style="margin-top:0.5rem;">
+                    <div class="pk-gen-overlay__progress-bar">
+                      <div class="pk-gen-overlay__progress-fill" data-mobile-progress-fill style="width:0%;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:0.375rem;font-size:10px;color:#a08f7d;">
+                      <span data-mobile-generation-phase>Sketching...</span>
+                      <span data-mobile-progress-text>0%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="pk-gen-overlay__glow"></div>
+              </div>
+            </div>
+          </div>
+
+          {%- comment -%} Room view (mobile) {%- endcomment -%}
+          <div data-mobile-room-view hidden style="position:absolute;inset:0;border-radius:9px;overflow:hidden;">
+            <img src="" data-mobile-room-image alt="Room" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.92;">
+            <div style="position:absolute;top:23%;left:57%;transform:translateX(-50%);width:18%;min-width:170px;max-width:250px;" data-mobile-room-artwork>
+              <div class="pk-frame pk-frame--aspect-portrait">
+                <div class="pk-frame__sheen"></div>
+                <div class="pk-frame__inner-border">
+                  <div class="pk-frame__inner-frame">
+                    <div class="pk-frame__mat">
+                      <div class="pk-frame__canvas">
+                        <img data-mobile-room-canvas-image src="" alt="In room" style="width:100%;height:100%;object-fit:cover;">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} Selection chips {%- endcomment -%}
+      <div class="pk-selection-chips">
+        <span class="pk-selection-chips__label">Selected</span>
+        <button type="button" class="pk-selection-chip pk-selection-chip--active" data-chip-style>Classic Oil</button>
+        <button type="button" class="pk-selection-chip" data-chip-size>Portrait · 60 x 75 cm</button>
+        <button type="button" class="pk-selection-chip" data-chip-frame>Antique Gold</button>
+      </div>
+    </div>
+
+    {%- comment -%} Mobile scrolling content {%- endcomment -%}
+    <div style="max-width:1600px;margin:0 auto;padding:0 1rem 8rem 1rem;">
+      <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.5rem;">
+
+        {%- comment -%} 1. Upload card {%- endcomment -%}
+        <div class="pk-mobile-card">
+          <div class="pk-mobile-card__header">
+            <p class="pk-eyebrow-sm" style="color:#8B7E66;">1. Your Photo</p>
+            <h3>Start with a clear photo</h3>
+          </div>
+          <div class="pk-mobile-card__body">
+            {%- comment -%} Mobile no-upload state {%- endcomment -%}
+            <div data-mobile-upload-empty>
+              <button type="button" class="pk-mobile-upload-btn" data-mobile-upload-trigger>
+                <div class="pk-mobile-upload-btn__icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                </div>
+                <span class="pk-mobile-upload-btn__text">Upload Your Pet's Photo</span>
+              </button>
+            </div>
+            {%- comment -%} Mobile uploaded state {%- endcomment -%}
+            <div data-mobile-upload-preview hidden>
+              <div class="pk-mobile-photo-preview">
+                <div class="pk-mobile-photo-preview__wrap">
+                  <img class="pk-mobile-photo-preview__img" data-mobile-upload-image src="" alt="Uploaded pet" loading="lazy">
+                  <div class="pk-mobile-photo-preview__gradient"></div>
+                  <button type="button" class="pk-mobile-photo-change" data-mobile-upload-change>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                    Change Photo
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p class="pk-error-text" data-mobile-upload-error hidden role="alert"></p>
+          </div>
+        </div>
+
+        {%- comment -%} 2. Style card {%- endcomment -%}
+        <div class="pk-mobile-card" data-mobile-style-section>
+          <div class="pk-mobile-card__header">
+            <p class="pk-eyebrow-sm" style="color:#8B7E66;">2. Choose Style</p>
+            <h3>Choose the painterly direction</h3>
+          </div>
+          <div class="pk-mobile-style-grid" data-mobile-style-grid>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'painting_style' -%}
+                {%- assign _msi = '' -%}
+                {%- case block.settings.style_key -%}
+                  {%- when 'classic', 'classic-oil' -%}{%- assign _msi = 'style-classic.png' | asset_url -%}
+                  {%- when 'impressionist' -%}{%- assign _msi = 'style-impressionist.png' | asset_url -%}
+                  {%- when 'warm', 'warm-painterly' -%}{%- assign _msi = 'style-warm.png' | asset_url -%}
+                  {%- when 'minimal', 'modern-minimal' -%}{%- assign _msi = 'style-minimal.png' | asset_url -%}
+                {%- endcase -%}
+                <button type="button" class="pk-mobile-style-card" data-mobile-style-key="{{ block.settings.style_key }}">
+                  <div class="pk-mobile-style-card__img-wrap">
+                    {%- if _msi != blank -%}
+                      <img class="pk-mobile-style-card__img" src="{{ _msi }}" alt="{{ block.settings.style_name }}" loading="lazy" decoding="async">
+                    {%- else -%}
+                      <div class="pk-mobile-style-card__img" style="background:#d4c4a8;display:flex;align-items:center;justify-content:center;">
+                        <span style="font-size:2rem;" aria-hidden="true">&#127912;</span>
+                      </div>
+                    {%- endif -%}
+                    <div class="pk-mobile-style-card__gradient"></div>
+                    <div class="pk-mobile-style-card__check">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                  </div>
+                  <div class="pk-mobile-style-card__info">
+                    <div class="pk-mobile-style-card__tone">{{ block.settings.style_tone | default: 'Painting style' }}</div>
+                    <h4 class="pk-mobile-style-card__title">{{ block.settings.style_name }}</h4>
+                  </div>
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          <div class="pk-mobile-style-note" data-mobile-style-note>{{ section.blocks.first.settings.style_description | default: 'Select a painting style to get started.' }}</div>
+        </div>
+
+        {%- comment -%} 3. Size card {%- endcomment -%}
+        <div class="pk-mobile-card" data-mobile-size-section>
+          <div class="pk-mobile-card__header">
+            <p class="pk-eyebrow-sm" style="color:#8B7E66;">3. Size</p>
+            <h3>Pick the wall presence</h3>
+          </div>
+          <div class="pk-mobile-size-grid" data-mobile-size-grid>
+            <button type="button" class="pk-mobile-size-card" data-mobile-size-key="portrait-40x50">
+              <div class="pk-mobile-size-card__orient">Vertical</div>
+              <div class="pk-mobile-size-card__metric">Portrait · 40 x 50 cm</div>
+            </button>
+            <button type="button" class="pk-mobile-size-card pk-mobile-size-card--active" data-mobile-size-key="portrait-60x75">
+              <div class="pk-mobile-size-card__orient">Vertical</div>
+              <div class="pk-mobile-size-card__metric">Portrait · 60 x 75 cm</div>
+            </button>
+            <button type="button" class="pk-mobile-size-card" data-mobile-size-key="landscape-75x60">
+              <div class="pk-mobile-size-card__orient">Landscape</div>
+              <div class="pk-mobile-size-card__metric">Landscape · 75 x 60 cm</div>
+            </button>
+            <button type="button" class="pk-mobile-size-card" data-mobile-size-key="landscape-100x80">
+              <div class="pk-mobile-size-card__orient">Landscape</div>
+              <div class="pk-mobile-size-card__metric">Landscape · 100 x 80 cm</div>
+            </button>
+            <button type="button" class="pk-mobile-size-card" data-mobile-size-key="square-60x60">
+              <div class="pk-mobile-size-card__orient">Square</div>
+              <div class="pk-mobile-size-card__metric">Square · 60 x 60 cm</div>
+            </button>
+            <button type="button" class="pk-mobile-size-card pk-mobile-size-card--full" data-mobile-size-key="custom-size">
+              <div class="pk-mobile-size-card__orient">Custom</div>
+              <div class="pk-mobile-size-card__metric">Custom Size</div>
+            </button>
+          </div>
+        </div>
+
+        {%- comment -%} 4. Frame card {%- endcomment -%}
+        <div class="pk-mobile-card" data-mobile-frame-section>
+          <div class="pk-mobile-card__header">
+            <p class="pk-eyebrow-sm" style="color:#8B7E66;">4. Frame</p>
+            <h3>Choose the finishing frame</h3>
+          </div>
+          <div class="pk-mobile-frame-grid" data-mobile-frame-grid>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'frame_option' -%}
+                {%- assign _mfi = '' -%}
+                {%- case block.settings.frame_key -%}
+                  {%- when 'gold' -%}{%- assign _mfi = 'frame-gold.webp' | asset_url -%}
+                  {%- when 'antique-gold' -%}{%- assign _mfi = 'frame-antique-gold.webp' | asset_url -%}
+                  {%- when 'walnut' -%}{%- assign _mfi = 'frame-walnut.webp' | asset_url -%}
+                  {%- when 'natural-wood' -%}{%- assign _mfi = 'frame-natural-wood.webp' | asset_url -%}
+                  {%- when 'black' -%}{%- assign _mfi = 'frame-black.webp' | asset_url -%}
+                {%- endcase -%}
+                <button type="button" class="pk-mobile-frame-card" data-mobile-frame-key="{{ block.settings.frame_key }}">
+                  <div class="pk-mobile-frame-card__img-wrap">
+                    {%- if _mfi != blank -%}
+                      <img class="pk-mobile-frame-card__img" src="{{ _mfi }}" alt="{{ block.settings.frame_name }}" loading="lazy" decoding="async">
+                    {%- else -%}
+                      <div class="pk-mobile-frame-card__img" style="background:{{ block.settings.frame_gradient }};"></div>
+                    {%- endif -%}
+                    <div class="pk-mobile-frame-card__check">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                  </div>
+                  <div class="pk-mobile-frame-card__label">{{ block.settings.frame_name }}</div>
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        {%- comment -%} Mobile selection summary (shown after generation) {%- endcomment -%}
+        <div class="pk-mobile-summary" data-mobile-summary hidden>
+          <div class="pk-mobile-summary__header">
+            <div>
+              <p class="pk-eyebrow-sm" style="color:#8B7E66;">Selection</p>
+              <h3 style="margin-top:0.5rem;font-size:1.5rem;line-height:1.15;letter-spacing:-0.04em;color:#241C16;font-family:var(--font-serif);">Ready for details.</h3>
+            </div>
+            <div class="pk-mobile-summary__price-badge" data-mobile-summary-price>{{ product.price | money }}</div>
+          </div>
+          <div class="pk-mobile-summary__grid">
+            <div class="pk-mobile-summary__cell">
+              <div class="pk-mobile-summary__cell-label">Style</div>
+              <div class="pk-mobile-summary__cell-value" data-mobile-summary-style>—</div>
+            </div>
+            <div class="pk-mobile-summary__cell">
+              <div class="pk-mobile-summary__cell-label">Size</div>
+              <div class="pk-mobile-summary__cell-value" data-mobile-summary-size>—</div>
+            </div>
+            <div class="pk-mobile-summary__cell">
+              <div class="pk-mobile-summary__cell-label">Frame</div>
+              <div class="pk-mobile-summary__cell-value" data-mobile-summary-frame>—</div>
+            </div>
+            <div class="pk-mobile-summary__cell">
+              <div class="pk-mobile-summary__cell-label">Room Mockup</div>
+              <div class="pk-mobile-summary__cell-value">Gallery Wall</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Mobile bottom CTA {%- endcomment -%}
+    <div class="pk-mobile-cta" data-mobile-cta>
+      <div class="pk-mobile-cta__inner">
+        {%- comment -%} States controlled by JS {%- endcomment -%}
+        <div data-mobile-cta-upload style="width:100%;">
+          <button type="button" class="pk-btn pk-btn--primary pk-btn--full" data-mobile-upload-cta style="padding:1rem;font-size:14px;">Upload a photo to start</button>
+        </div>
+        <div data-mobile-cta-generate hidden style="width:100%;">
+          <button type="button" class="pk-btn pk-btn--generate pk-btn--full" data-mobile-generate-btn disabled style="padding:1rem;font-size:14px;">
+            <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.12);color:white;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.21 1.21 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+            </span>
+            <span data-mobile-generate-label>Generate Preview</span>
+          </button>
+        </div>
+        <div data-mobile-cta-continue hidden style="display:flex;align-items:center;gap:0.75rem;width:100%;">
+          <div style="flex:1;min-width:0;">
+            <div class="pk-mobile-cta__price-label">All-in Price</div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;">
+              <span class="pk-mobile-cta__price" data-mobile-cta-price>{{ product.price | money }}</span>
+              <span class="pk-mobile-cta__price-hint">Preview, painting, shipping</span>
+            </div>
+          </div>
+          <button type="button" class="pk-btn pk-btn--primary" data-mobile-checkout-btn style="flex-shrink:0;padding:1rem 1.25rem;font-size:14px;">
+            Continue
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8 22 12 18 16"/><path d="M2 12h20"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div> {%- comment -%} /data-customizer-main {%- endcomment -%}
+
+  {%- comment -%} ─── DETAILS PANEL (Step 3) ─── {%- endcomment -%}
+  <div class="pk-details" data-details-panel hidden>
+    <div class="pk-details__inner">
+      {%- comment -%} Preview approved badge + summary chips {%- endcomment -%}
+      <div class="pk-details__card">
+        <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.25rem 0.75rem;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.24em;background:#efe5d8;color:#4f4437;border-radius:2px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          Preview approved
+        </div>
+
+        <div class="pk-details__chips">
+          <div class="pk-details__chip">
+            <p class="pk-details__chip-label">Style</p>
+            <p class="pk-details__chip-value" data-details-style>—</p>
+          </div>
+          <div class="pk-details__chip">
+            <p class="pk-details__chip-label">Tone</p>
+            <p class="pk-details__chip-value" data-details-tone>—</p>
+          </div>
+          <div class="pk-details__chip">
+            <p class="pk-details__chip-label">Size</p>
+            <p class="pk-details__chip-value" data-details-size>—</p>
+          </div>
+          <div class="pk-details__chip">
+            <p class="pk-details__chip-label">Frame</p>
+            <p class="pk-details__chip-value" data-details-frame>—</p>
+          </div>
+        </div>
+
+        {%- comment -%} Artwork + info grid {%- endcomment -%}
+        <div class="pk-details__grid">
+          <div class="pk-details__artwork">
+            <p class="pk-details__section-label">Approved artwork</p>
+            <div class="pk-details__frame-wrap">
+              <img data-details-artwork-img src="" alt="Generated artwork" class="pk-details__artwork-img">
+            </div>
+            <div class="pk-details__source-thumb">
+              <img data-details-source-img src="" alt="Source upload">
+              <p class="pk-details__source-label">Source photo</p>
+            </div>
+            <div class="pk-details__info-rows">
+              <div class="pk-details__info-row">
+                <span>Format</span><span>Hand-painted portrait</span>
+              </div>
+              <div class="pk-details__info-row">
+                <span>Presentation</span><span data-details-frame-label>—</span>
+              </div>
+              <div class="pk-details__info-row">
+                <span>Scale</span><span data-details-size-label>—</span>
+              </div>
+            </div>
+          </div>
+
+          {%- comment -%} Order summary {%- endcomment -%}
+          <div class="pk-details__order">
+            <p class="pk-details__section-label">Payment details</p>
+            <h2 class="pk-details__order-title">Order summary</h2>
+
+            <div class="pk-details__price-rows">
+              <div class="pk-details__price-row">
+                <span>Hand-painted portrait</span><span>{{ product.price | money }}</span>
+              </div>
+              <div class="pk-details__price-row">
+                <span>Frame finishing</span><span>Included</span>
+              </div>
+              <div class="pk-details__price-row">
+                <span>Protected shipping</span><span>Included</span>
+              </div>
+            </div>
+
+            <div class="pk-details__total">
+              <div>
+                <p class="pk-details__section-label">Total</p>
+                <p class="pk-details__total-price" data-details-price>{{ product.price | money }}</p>
+              </div>
+              <div class="pk-details__secure-badge">Secure checkout next</div>
+            </div>
+
+            <button type="button" class="pk-btn pk-btn--primary pk-btn--full" data-details-checkout-btn style="margin-top:1rem;padding:1rem;font-size:14px;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+              Continue to Secure Payment
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+
+            <button type="button" class="pk-btn pk-btn--ghost" data-details-back-btn style="width:100%;margin-top:0.75rem;font-size:14px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              Back to Preview
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Error message {%- endcomment -%}
+  <p class="pk-error-text" data-error-message hidden role="alert"></p>
 </div>
 
-<div class="product-form">
-  {% form 'product', product %}
-    {% assign current_variant = product.selected_or_first_available_variant %}
+{%- comment -%} Variant data for JavaScript {%- endcomment -%}
+<script type="application/json" data-variant-data>
+[
+  {%- for variant in product.variants -%}
+    {
+      "id": {{ variant.id }},
+      "price": {{ variant.price | money_without_currency | json }},
+      "price_formatted": {{ variant.price | money | json }},
+      "compare_at_price": {% if variant.compare_at_price %}{{ variant.compare_at_price | money_without_currency | json }}{% else %}null{% endif %},
+      "compare_at_price_formatted": {% if variant.compare_at_price %}{{ variant.compare_at_price | money | json }}{% else %}null{% endif %},
+      "available": {{ variant.available | json }},
+      "options": {
+        {%- for opt in variant.options -%}
+          {{ product.options[forloop.index0] | downcase | json }}: {{ opt | json }}{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      }
+    }{% unless forloop.last %},{% endunless %}
+  {%- endfor -%}
+]
+</script>
 
-    <select name="id">
-      {% for variant in product.variants %}
-        <option
-          value="{{ variant.id }}"
-          {% if variant == current_variant %}
-            selected="selected"
-          {% endif %}
-        >
-          {{ variant.title }} - {{ variant.price | money }}
-        </option>
-      {% endfor %}
-    </select>
+{%- comment -%} Style data for JS lookup {%- endcomment -%}
+<script type="application/json" data-style-data>
+[
+  {%- assign _first_style = true -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'painting_style' -%}
+    {%- unless _first_style -%},{%- endunless -%}
+    {%- assign _jsi = '' -%}
+    {%- case block.settings.style_key -%}
+      {%- when 'classic', 'classic-oil' -%}{%- assign _jsi = 'style-classic.png' | asset_url -%}
+      {%- when 'impressionist' -%}{%- assign _jsi = 'style-impressionist.png' | asset_url -%}
+      {%- when 'warm', 'warm-painterly' -%}{%- assign _jsi = 'style-warm.png' | asset_url -%}
+      {%- when 'minimal', 'modern-minimal' -%}{%- assign _jsi = 'style-minimal.png' | asset_url -%}
+    {%- endcase -%}
+    {
+      "key": {{ block.settings.style_key | json }},
+      "name": {{ block.settings.style_name | json }},
+      "tone": {{ block.settings.style_tone | json }},
+      "description": {{ block.settings.style_description | json }},
+      "image": {{ _jsi | json }}
+    }
+    {%- assign _first_style = false -%}
+    {%- endif -%}
+  {%- endfor -%}
+]
+</script>
 
-    <input type="text" name="quantity" min="1" value="1">
+{%- comment -%} Frame data for JS lookup {%- endcomment -%}
+<script type="application/json" data-frame-data>
+[
+  {%- assign _first_frame = true -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'frame_option' -%}
+    {%- unless _first_frame -%},{%- endunless -%}
+    {%- assign _jfi = '' -%}
+    {%- case block.settings.frame_key -%}
+      {%- when 'gold' -%}{%- assign _jfi = 'frame-gold.webp' | asset_url -%}
+      {%- when 'antique-gold' -%}{%- assign _jfi = 'frame-antique-gold.webp' | asset_url -%}
+      {%- when 'walnut' -%}{%- assign _jfi = 'frame-walnut.webp' | asset_url -%}
+      {%- when 'natural-wood' -%}{%- assign _jfi = 'frame-natural-wood.webp' | asset_url -%}
+      {%- when 'black' -%}{%- assign _jfi = 'frame-black.webp' | asset_url -%}
+    {%- endcase -%}
+    {
+      "key": {{ block.settings.frame_key | json }},
+      "name": {{ block.settings.frame_name | json }},
+      "gradient": {{ block.settings.frame_gradient | json }},
+      "image": {{ _jfi | json }}
+    }
+    {%- assign _first_frame = false -%}
+    {%- endif -%}
+  {%- endfor -%}
+]
+</script>
 
-    <input type="submit" value="Add to cart">
-    {{ form | payment_button }}
-  {% endform %}
-</div>
+{%- comment -%} Room scene data {%- endcomment -%}
+<script type="application/json" data-room-data>
+[
+  { "id": "gallery", "label": "Gallery Wall", "image": "{{ 'create_placeholder_option_b_20260628.png' | asset_url }}" }
+]
+</script>
+
+{% comment %} Load customizer JS {% endcomment %}
+<script src="{{ 'product-customizer.js' | asset_url }}" defer></script>
+
+{% stylesheet %}
+  /* Desktop/Mobile visibility */
+  .pk-desktop-create { display: none; }
+  .pk-mobile-create { display: block; }
+  @media (min-width: 1024px) {
+    .pk-desktop-create { display: flex; gap: 1.5rem; padding-top: 1rem; padding-bottom: 0; padding-left: 2rem; padding-right: 2rem; flex: 1; min-width: 0; max-width: 1600px; margin: 0 auto; width: 100%; align-items: stretch; }
+    .pk-mobile-create { display: none; }
+    .pk-create__canvas-area { height: auto; align-self: stretch; }
+  }
+
+  /* Step bar wrapper */
+  .pk-step-bar-wrapper {
+    border-bottom: 1px solid #E5E1D8;
+    background: #F1EFE9;
+  }
+  .pk-step-bar-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  @media (min-width: 768px) {
+    .pk-step-bar-inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      height: 52px;
+      padding: 0 2rem;
+    }
+    .pk-step-bar__back {
+      position: absolute;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-58%);
+    }
+  }
+  .pk-step-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    gap: 0;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  @media (max-width: 1023px) {
+    .pk-desktop-create { display: none; }
+    .pk-step-bar-wrapper { display: none; }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.product",
+  "name": "Piktura Customizer",
+  "tag": "section",
   "settings": [],
+  "blocks": [
+    {
+      "type": "painting_style",
+      "name": "Painting Style",
+      "settings": [
+        {
+          "type": "text",
+          "id": "style_key",
+          "label": "Style Key",
+          "default": "classic-oil"
+        },
+        {
+          "type": "text",
+          "id": "style_name",
+          "label": "Style Name",
+          "default": "Classic Oil"
+        },
+        {
+          "type": "text",
+          "id": "style_tone",
+          "label": "Style Tone",
+          "default": "Heirloom warmth"
+        },
+        {
+          "type": "textarea",
+          "id": "style_description",
+          "label": "Style Description",
+          "default": "Richer shadow depth and a more traditional, collected wall presence."
+        },
+        {
+          "type": "text",
+          "id": "style_image",
+          "label": "Style Preview Image URL"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Card Background",
+          "default": "#8B4513"
+        }
+      ]
+    },
+    {
+      "type": "frame_option",
+      "name": "Frame Option",
+      "settings": [
+        {
+          "type": "text",
+          "id": "frame_key",
+          "label": "Frame Key",
+          "default": "gold"
+        },
+        {
+          "type": "text",
+          "id": "frame_name",
+          "label": "Frame Name",
+          "default": "Gold"
+        },
+        {
+          "type": "text",
+          "id": "frame_gradient",
+          "label": "Frame CSS Gradient",
+          "default": "linear-gradient(135deg, #d9bc72 0%, #ac7d2f 52%, #edcf8d 100%)"
+        },
+        {
+          "type": "text",
+          "id": "frame_image",
+          "label": "Frame Texture Image URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Piktura Customizer",
+      "blocks": [
+        {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "classic",
+            "style_name": "Classic Oil",
+            "style_tone": "Heirloom warmth",
+            "style_description": "Richer shadow depth and a more traditional, collected wall presence.",
+            "background_color": "#8B4513"
+          }
+        },
+        {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "impressionist",
+            "style_name": "Impressionist",
+            "style_tone": "Loose and luminous",
+            "style_description": "Soft brushwork that keeps the likeness gentle while opening up the color.",
+            "background_color": "#93C5FD"
+          }
+        },
+        {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "warm",
+            "style_name": "Warm & Painterly",
+            "style_tone": "Golden emotional light",
+            "style_description": "Denser texture, warmer light, and a slightly more cinematic finish.",
+            "background_color": "#D4A76A"
+          }
+        },
+        {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "minimal",
+            "style_name": "Modern Minimal",
+            "style_tone": "Quiet poster energy",
+            "style_description": "Cleaner shapes and calmer contrast for a more contemporary silhouette.",
+            "background_color": "#E5E7EB"
+          }
+        },
+        {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "gold",
+            "frame_name": "Gold",
+            "frame_gradient": "linear-gradient(135deg, #d9bc72 0%, #ac7d2f 52%, #edcf8d 100%)"
+          }
+        },
+        {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "antique-gold",
+            "frame_name": "Antique Gold",
+            "frame_gradient": "linear-gradient(135deg, #ccb07a 0%, #8f662f 55%, #dec392 100%)"
+          }
+        },
+        {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "walnut",
+            "frame_name": "Walnut",
+            "frame_gradient": "linear-gradient(135deg, #7e5a3a 0%, #5d4028 55%, #9f7550 100%)"
+          }
+        },
+        {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "natural-wood",
+            "frame_name": "Natural Wood",
+            "frame_gradient": "linear-gradient(135deg, #d9c09a 0%, #b58d65 55%, #edd4b1 100%)"
+          }
+        },
+        {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "black",
+            "frame_name": "Black",
+            "frame_gradient": "linear-gradient(135deg, #242321 0%, #0e0d0c 55%, #4c4943 100%)"
+          }
+        }
+      ]
+    }
+  ],
   "disabled_on": {
     "groups": ["header", "footer"]
   }

@@ -69,6 +69,12 @@
         "label": "t:labels.foreground"
       },
       {
+        "type": "color",
+        "id": "accent_color",
+        "default": "#B8860B",
+        "label": "t:labels.accent_color"
+      },
+      {
         "type": "range",
         "id": "input_corner_radius",
         "min": 0,
@@ -77,6 +83,23 @@
         "unit": "px",
         "label": "t:labels.input_corner_radius",
         "default": 4
+      }
+    ]
+  },
+  {
+    "name": "t:general.app_integration",
+    "settings": [
+      {
+        "type": "text",
+        "id": "app_url",
+        "label": "t:labels.app_url",
+        "default": "https://pet-paiting-app.vercel.app"
+      },
+      {
+        "type": "checkbox",
+        "id": "use_real_generation",
+        "label": "t:labels.use_real_generation",
+        "default": true
       }
     ]
   }

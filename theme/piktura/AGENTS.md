@@ -2,6 +2,80 @@
 
 🚨 MANDATORY: YOU MUST CALL "learn_shopify_api" ONCE WHEN WORKING WITH LIQUID THEMES.
 
+---
+
+## 🚨 HIGHEST PRIORITY — Code Standards (MANDATORY)
+
+> **ALL frontend code MUST comply with `代码规范.md`.** Read it before writing any new section, snippet, JS file, or page template.
+
+The project targets three pillars: **Performance (Core Web Vitals)**, **Google SEO**, and **Mobile Responsiveness**.
+
+### Performance (Core Web Vitals)
+
+- **LCP < 2.5s**: First-viewport images: `fetchpriority="high" loading="eager"`. All other images: `loading="lazy" decoding="async"`. Use `font-display: swap`.
+- **CLS < 0.1**: All `<img>` must have `width` + `height` or `aspect-ratio` container. Reserve `min-height` for dynamic content. Use `display: none` / `hidden` for content shown later.
+- **INP < 200ms**: JS loaded with `defer`. Use event delegation. Image compression: `MAX_LONG_SIDE <= 1200px`. Polling with exponential backoff + `AbortController`.
+- **JS bundle < 15KB gzip**: Vanilla JS only. No third-party JS libraries. `{% stylesheet %}` only in the section that needs it.
+
+### Google SEO
+
+- **Semantic HTML**: Single `<h1>` per page. Use `<main>`, `<nav>`, `<aside>`, `<section>`. Breadcrumb: `<nav aria-label="Breadcrumb">`.
+- **Structured Data**: Product JSON-LD (`product | structured_data`), BreadcrumbList JSON-LD. Place in `<head>` via `<script type="application/ld+json">`.
+- **Meta Tags**: Every page: `<title>` + `<meta name="description">` + `canonical` + OG + Twitter Card. All managed in `snippets/meta-tags.liquid`.
+- **Accessibility**: All `<img>` have descriptive `alt`. Interactive elements have `aria-label`. Dynamic regions: `aria-live="polite"` + `.sr-only`. Loading buttons: `aria-busy` + `disabled`. Color contrast >= 4.5:1 (WCAG AA). Keyboard accessible: `tabindex="0"` + Enter/Space.
+
+### Mobile Responsiveness
+
+- **Mobile-first CSS**: Base styles = mobile. Desktop via `@media (min-width: 1024px)`.
+- **Breakpoints**: 640px (small mobile adjustments) / 1024px (desktop).
+- **Touch targets**: All interactive elements `min-height: 44px; min-width: 44px`. Gap between buttons >= 8px.
+- **Sticky CTA**: Key action buttons: `position: sticky; bottom: 0;` on mobile.
+- **Font size**: Input fields `font-size >= 16px` (prevents iOS Safari auto-zoom).
+- **File upload**: `<input type="file" accept="image/jpeg,image/png,image/webp">` triggers native camera/gallery.
+
+### 🎨 Dual-Viewport Architecture (MANDATORY — Plan & Build)
+
+> **Mobile and desktop are NOT the same page with different CSS — they are different designs.**
+> When planning or implementing any frontend feature, you MUST first analyze the visual spec to understand what mobile (≤768px) and desktop (≥1024px) each look like and how they each behave.
+
+**Before writing any code**, answer these questions from the visual spec:
+1. **Layout**: Are the mobile and desktop layouts structurally different (e.g. different column counts, different element order, different component trees)? Or is it just spacing/sizing adjustment?
+2. **Elements**: Does either viewport have elements that don't exist in the other? (e.g. mobile-only source card, desktop-only sidebar)
+3. **Interaction**: Are click/hover/scroll behaviors different between viewports? (e.g. desktop hover-reveal vs mobile tap-toggle, desktop inline CTA vs mobile fixed-bottom CTA)
+4. **Animation**: Do animations differ? (e.g. desktop has complex morph while mobile is simpler or absent)
+
+**Implementation patterns** based on complexity level:
+- **Level 3 — Independent component trees** (Home Hero, Create): Build two completely separate HTML blocks toggled by `display:none` / `@media (min-width: 1024px)`. Each tree has its own CSS classes and JS data attributes (e.g. `data-hero-painted` vs `data-hero-painted-mobile`).
+- **Level 2 — JS viewport detection** (Checkout, PaymentDetails): Use `window.innerWidth < 768` to branch interaction logic. Single HTML tree with JS-driven layout switching.
+- **Level 1 — Pure CSS responsive** (About, FAQ, RefundPolicy): Standard media queries adjusting grid columns, padding, font sizes. Single HTML tree.
+
+**Never** assume a single responsive implementation covers both viewports. Always verify against the visual spec before committing to an approach.
+
+### 🎨 Visual Fidelity Verification (MANDATORY — Test & Ship)
+
+> **When verifying any frontend page against visual specs, you MUST test BOTH viewport scenarios separately:**
+> 1. **Mobile narrow screen** (≤ 768px width, e.g. iPhone 14 @ 390×844)
+> 2. **PC wide screen** (≥ 1024px width, e.g. 1440×900 desktop browser)
+>
+> Both scenarios MUST independently match the corresponding visual spec. A page that passes on desktop but fails on mobile (or vice versa) is **NOT** considered visually aligned.
+
+- **Separate component trees**: Some pages (Home Hero, Create) have completely different HTML/CSS/JS for mobile vs desktop (`pk-hero__artwork--mobile` vs `pk-hero__artwork--desktop`). Each tree must be verified independently.
+- **Never assume responsive CSS is sufficient**: The visual spec defines distinct layouts, interactions, and elements for each viewport — not just CSS media query adjustments.
+- **Verification workflow**: Resize browser to mobile width → screenshot → compare with mobile spec. Then resize to desktop width → screenshot → compare with desktop spec.
+
+### Checklist (MUST follow before committing)
+
+New section: semantic tags, single h1, img alt + size, aria labels, mobile-first CSS, no third-party JS, no `!important`.
+New snippet: `{% doc %}` with `@param` + `@example`, no CLS, img size + alt.
+New JS file: IIFE + `defer`, event delegation, `MAX_LONG_SIDE <= 1200`, exponential backoff + AbortController, < 15KB gzip.
+New template: JSON-LD, BreadcrumbList, meta tags, single h1, Lighthouse >= 90 Performance/SEO/Accessibility.
+**Dual-viewport analysis**: Before coding, MUST analyze visual spec for mobile AND desktop differences in layout, elements, interaction, and animation.
+**Visual verification**: MUST pass both mobile narrow screen AND PC wide screen independently against visual specs.
+
+Full details with code examples: **`代码规范.md`**
+
+---
+
 ## Theme Architecture
 
 **Key principles: focus on generating snippets, blocks, and sections; users may create templates using the theme editor**

@@ -1,0 +1,51 @@
+{
+  "sections": {
+    "main": {
+      "type": "piktura-refund-policy",
+      "settings": {
+        "hero_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/09-refund-hero.png",
+        "contact_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/10-refund-contact.png",
+        "disclaimer_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/11-refund-disclaimer.png"
+      },
+      "blocks": {
+        "qp_1": { "type": "quick_policy", "settings": { "icon": "dollar", "title": "Cancel before painting begins", "body": "Before the artist starts, the order can be canceled for a full refund." } },
+        "qp_2": { "type": "quick_policy", "settings": { "icon": "brush", "title": "Free revisions before shipping", "body": "Reasonable refinements are included while the final artwork is still being reviewed." } },
+        "qp_3": { "type": "quick_policy", "settings": { "icon": "shield", "title": "30-day protection for damage or defects", "body": "If the artwork arrives damaged or clearly defective, contact us within 30 days of delivery." } },
+        "ps_1": {
+          "type": "policy_section",
+          "settings": {
+            "eyebrow": "Cancellation Before Painting Begins",
+            "title": "Full refund before the artist starts.",
+            "paragraph_1": "You may cancel your order for a full refund before your artist starts working on the painting.",
+            "paragraph_2": "Once the artist has started, the order is considered in production and can no longer be cancelled for a full refund."
+          }
+        },
+        "ps_2": {
+          "type": "policy_section",
+          "settings": {
+            "eyebrow": "Free Revisions Before Shipping",
+            "title": "Refine the details while the piece is still in progress.",
+            "paragraph_1": "We offer free revisions before your painting is shipped.",
+            "paragraph_2": "If we share a preview before shipping, you may request reasonable adjustments to help the artwork better match your original photo and order request.",
+            "paragraph_3": "This may include details such as facial features, colors, background, or other small refinements.",
+            "paragraph_4": "Major changes outside the original order request may require additional time and may not always be possible."
+          }
+        },
+        "ps_3": {
+          "type": "policy_section",
+          "settings": {
+            "eyebrow": "Damage or Defect Within 30 Days",
+            "title": "A separate resolution path for verified issues.",
+            "paragraph_1": "If your painting arrives damaged or has a clear production defect, please contact us within 30 days of delivery.",
+            "paragraph_2": "After reviewing the issue, we may offer a replacement, repair, or refund depending on the situation.",
+            "paragraph_3": "Please include your order number and clear photos of the issue. If the package was damaged during shipping, please also include photos of the packaging."
+          }
+        },
+        "dn_1": { "type": "disclaimer_note", "settings": { "note": "Each painting is handmade, so small variations in brushwork, texture, and artistic interpretation are part of the custom artwork process. These natural differences are not considered defects." } },
+        "dn_2": { "type": "disclaimer_note", "settings": { "note": "Color may also appear slightly different in person than on a screen due to display settings and lighting conditions." } }
+      },
+      "block_order": ["qp_1", "qp_2", "qp_3", "ps_1", "ps_2", "ps_3", "dn_1", "dn_2"]
+    }
+  },
+  "order": ["main"]
+}

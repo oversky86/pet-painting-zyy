@@ -1,0 +1,40 @@
+{
+  "sections": {
+    "main": {
+      "type": "piktura-about",
+      "settings": {
+        "hero_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/01-about-hero.jpg",
+        "story_image_1": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/02-about-story1.jpg",
+        "story_image_2": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/03-about-story2.png"
+      },
+      "blocks": {
+        "principle_1": {
+          "type": "principle",
+          "settings": {
+            "icon": "frame",
+            "title": "Preview first",
+            "text": "See the direction before committing to production. Mock-ups give confidence that the tone and composition feel right."
+          }
+        },
+        "principle_2": {
+          "type": "principle",
+          "settings": {
+            "icon": "brush",
+            "title": "Artist finished",
+            "text": "Every piece is completed by a painter, not generated and shipped. The preview guides the work; the artist refines it."
+          }
+        },
+        "principle_3": {
+          "type": "principle",
+          "settings": {
+            "icon": "shield",
+            "title": "Made for the wall",
+            "text": "Frames, finishes, and packaging are chosen so the piece arrives ready to hang and built to last."
+          }
+        }
+      },
+      "block_order": ["principle_1", "principle_2", "principle_3"]
+    }
+  },
+  "order": ["main"]
+}

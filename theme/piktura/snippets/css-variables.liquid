@@ -1,3 +1,47 @@
+{% comment %}
+  Piktura CSS Variables
+  Warm gallery color palette + typography tokens.
+{% endcomment %}
+
+{% style %}
+  :root {
+    {% comment %} Typography {% endcomment %}
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-mono: 'Space Grotesk', monospace;
+    --font-heading: var(--font-sans);
+
+    {% comment %} Piktura Color Palette {% endcomment %}
+    --pk-cream: #F6F0E7;
+    --pk-cream-light: #FBF8F3;
+    --pk-cream-subtle: #EEE5D8;
+    --pk-warm-border: #DCCFBC;
+    --pk-warm-border-light: #E8DDCD;
+    --pk-brown-dark: #241C16;
+    --pk-brown: #31271F;
+    --pk-brown-medium: #53493E;
+    --pk-brown-light: #897A67;
+    --pk-gold: #A58964;
+    --pk-gold-dark: #6f5328;
+    --pk-gold-light: #f7e8bf;
+    --pk-white-warm: #F8F3EB;
+    --pk-inverted: #2D241B;
+
+    {% comment %} Theme-level tokens (compat with existing sections) {% endcomment %}
+    --font-primary--family: var(--font-sans);
+    --page-width: 100rem;
+    --page-margin: 24px;
+    --color-background: var(--pk-cream);
+    --color-foreground: var(--pk-brown-dark);
+    --color-accent: var(--pk-gold);
+    --color-muted: var(--pk-brown-light);
+    --color-border: var(--pk-warm-border);
+    --color-secondary: var(--pk-cream-subtle);
+    --color-primary: var(--pk-brown);
+    --color-primary-foreground: var(--pk-cream-light);
+    --style-border-radius-inputs: 8px;
+  }
+{% endstyle %}
 {% style %}
   {% # Loads all font variantions with display: swap %}
   {{ settings.type_primary_font | font_face: font_display: 'swap' }}
@@ -13,6 +57,12 @@
     --page-margin: {{ settings.min_page_margin }}px;
     --color-background: {{ settings.background_color }};
     --color-foreground: {{ settings.foreground_color }};
+    --color-accent: {{ settings.accent_color }};
+    --color-muted: color-mix(in srgb, var(--color-foreground) 60%, transparent);
+    --color-border: color-mix(in srgb, var(--color-foreground) 15%, transparent);
+    --color-secondary: color-mix(in srgb, var(--color-foreground) 5%, var(--color-background));
+    --color-primary: var(--color-foreground);
+    --color-primary-foreground: var(--color-background);
     --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
   }
 {% endstyle %}

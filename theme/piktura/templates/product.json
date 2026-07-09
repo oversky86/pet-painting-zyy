@@ -1,17 +1,110 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "main": {
       "type": "product",
-      "settings": {}
+      "settings": {},
+      "blocks": {
+        "style_classic": {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "classic",
+            "style_name": "Classic Oil",
+            "style_tone": "Heirloom warmth",
+            "style_description": "Richer shadow depth and a more traditional, collected wall presence.",
+            "background_color": "#8B4513",
+            "style_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/14-style-classic.jpg"
+          }
+        },
+        "style_impressionist": {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "impressionist",
+            "style_name": "Impressionist",
+            "style_tone": "Loose and luminous",
+            "style_description": "Soft brushwork that keeps the likeness gentle while opening up the color.",
+            "background_color": "#93C5FD",
+            "style_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/12-style-impressionist.jpg"
+          }
+        },
+        "style_warm": {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "warm",
+            "style_name": "Warm & Painterly",
+            "style_tone": "Golden emotional light",
+            "style_description": "Denser texture, warmer light, and a slightly more cinematic finish.",
+            "background_color": "#D4A76A",
+            "style_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/13-style-warm.jpg"
+          }
+        },
+        "style_minimal": {
+          "type": "painting_style",
+          "settings": {
+            "style_key": "minimal",
+            "style_name": "Modern Minimal",
+            "style_tone": "Quiet poster energy",
+            "style_description": "Cleaner shapes and calmer contrast for a more contemporary silhouette.",
+            "background_color": "#E5E7EB",
+            "style_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/15-style-minimal.jpg"
+          }
+        },
+        "frame_gold": {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "gold",
+            "frame_name": "Gold",
+            "frame_gradient": "linear-gradient(135deg, #d9bc72 0%, #ac7d2f 52%, #edcf8d 100%)",
+            "frame_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/16-frame-gold.png"
+          }
+        },
+        "frame_antique_gold": {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "antique-gold",
+            "frame_name": "Antique Gold",
+            "frame_gradient": "linear-gradient(135deg, #ccb07a 0%, #8f662f 55%, #dec392 100%)",
+            "frame_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/17-frame-antique-gold.png"
+          }
+        },
+        "frame_walnut": {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "walnut",
+            "frame_name": "Walnut",
+            "frame_gradient": "linear-gradient(135deg, #7e5a3a 0%, #5d4028 55%, #9f7550 100%)",
+            "frame_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/18-frame-walnut.png"
+          }
+        },
+        "frame_natural_wood": {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "natural-wood",
+            "frame_name": "Natural Wood",
+            "frame_gradient": "linear-gradient(135deg, #d9c09a 0%, #b58d65 55%, #edd4b1 100%)",
+            "frame_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/19-frame-natural-wood.png"
+          }
+        },
+        "frame_black": {
+          "type": "frame_option",
+          "settings": {
+            "frame_key": "black",
+            "frame_name": "Black",
+            "frame_gradient": "linear-gradient(135deg, #242321 0%, #0e0d0c 55%, #4c4943 100%)",
+            "frame_image": "https://cdn.shopify.com/s/files/1/0964/0686/4056/files/20-frame-black.png"
+          }
+        }
+      },
+      "block_order": [
+        "style_classic",
+        "style_impressionist",
+        "style_warm",
+        "style_minimal",
+        "frame_gold",
+        "frame_antique_gold",
+        "frame_walnut",
+        "frame_natural_wood",
+        "frame_black"
+      ]
     }
   },
   "order": [

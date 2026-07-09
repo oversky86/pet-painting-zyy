@@ -1,0 +1,61 @@
+{% doc %}
+  Renders a breadcrumb navigation for the current page.
+
+  Currently supports product pages. Shows: Home > Shop > Product Title.
+
+  @example
+  {% render 'breadcrumb' %}
+{% enddoc %}
+
+{%- if request.page_type == 'product' -%}
+  <nav class="breadcrumb" aria-label="{{ 'customizer.breadcrumb_label' | t }}">
+    <ol class="breadcrumb__list">
+      <li class="breadcrumb__item">
+        <a class="breadcrumb__link" href="{{ routes.root_url }}">{{ 'customizer.breadcrumb_home' | t }}</a>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      </li>
+      <li class="breadcrumb__item">
+        <a class="breadcrumb__link" href="{{ routes.root_url }}">{{ 'customizer.breadcrumb_shop' | t }}</a>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      </li>
+      <li class="breadcrumb__item">
+        <span class="breadcrumb__current" aria-current="page">{{ product.title }}</span>
+      </li>
+    </ol>
+  </nav>
+{%- endif -%}
+
+{% stylesheet %}
+  .breadcrumb {
+    padding: 1rem 0;
+    font-size: 0.875rem;
+  }
+  .breadcrumb__list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .breadcrumb__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .breadcrumb__link {
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .breadcrumb__link:hover {
+    color: var(--color-foreground);
+  }
+  .breadcrumb__separator {
+    color: var(--color-muted);
+  }
+  .breadcrumb__current {
+    color: var(--color-foreground);
+    font-weight: 500;
+  }
+{% endstylesheet %}

@@ -1,6 +1,7 @@
 {
   "general": {
     "404": "Not found",
+    "app_integration": "App Integration",
     "article": "Article",
     "block": "Block",
     "blog": "Blog",
@@ -20,9 +21,11 @@
     "layout": "Layout",
     "main": "Main",
     "page": "Page",
+    "painting_style": "Painting style",
     "password": "Password",
     "primary": "Primary",
     "product": "Product",
+    "product_customizer": "Product customizer",
     "row": "Row",
     "search": "Search",
     "secondary": "Secondary",
@@ -34,8 +37,11 @@
     "typography": "Typography"
   },
   "labels": {
+    "accent_color": "Accent color",
     "alignment": "Alignment",
+    "app_url": "App backend URL",
     "background": "Background",
+    "card_background": "Card background color",
     "foreground": "Foreground",
     "grid_gap": "Grid spacing",
     "grid_item_width": "Grid item width",
@@ -47,8 +53,12 @@
     "page_margin": "Page margin",
     "page_width": "Page width",
     "show_payment_icons": "Show payment icons",
+    "style_description": "Style description",
+    "style_key": "Style key (e.g. classic-oil)",
+    "style_name": "Style display name",
+    "text": "Text",
     "text_style": "Text style",
-    "text": "Text"
+    "use_real_generation": "Use real AI generation"
   },
   "options": {
     "alignment": {
@@ -72,6 +82,6 @@
       "title": "Title",
       "subtitle": "Subtitle",
       "normal": "Normal text"
-    },
+    }
   }
 }

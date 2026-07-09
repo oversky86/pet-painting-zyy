@@ -1,0 +1,333 @@
+{% comment %}
+  Piktura About Page Section
+  Matches About.tsx visual: hero, principles grid, story section, CTA.
+{% endcomment %}
+
+{%- comment -%} Hero {%- endcomment -%}
+<section class="pk-about-hero">
+  <div class="pk-about-hero__bg">
+    {%- if section.settings.hero_image != blank -%}
+      <img src="{{ section.settings.hero_image }}" alt="Gallery setting" loading="eager" decoding="async" fetchpriority="high">
+    {%- endif -%}
+    <div class="pk-about-hero__gradient"></div>
+  </div>
+  <div class="pk-about-hero__content pk-reveal">
+    <p class="pk-eyebrow">About Us</p>
+    <h1 class="pk-about-hero__title">{{ section.settings.hero_title | default: 'Piktura exists to make custom pet art feel more certain.' }}</h1>
+    <p class="pk-about-hero__text">{{ section.settings.hero_text | default: 'We built Piktura around a simple idea: choosing a portrait should feel calm and informed. Instead of asking people to imagine the final result from a tiny product thumbnail, we help them see direction, mood, and display context before the order moves forward.' }}</p>
+    <div class="pk-about-hero__actions">
+      <a href="{{ routes.root_url }}products" class="pk-btn pk-btn--primary button-lift">{{ section.settings.cta_primary | default: 'Start Your Painting' }}</a>
+      <a href="{{ routes.root_url }}" class="pk-btn pk-btn--secondary">{{ section.settings.cta_secondary | default: 'Back To Landing' }}</a>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} Principles {%- endcomment -%}
+<section class="pk-about-principles">
+  <div class="pk-about-principles__grid">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'principle' -%}
+        <article class="pk-about-principle pk-reveal" {{ block.shopify_attributes }}>
+          <div class="pk-about-principle__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              {%- case block.settings.icon -%}
+                {%- when 'shield' -%}<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
+                {%- when 'brush' -%}<path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>
+                {%- when 'frame' -%}<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                {%- else -%}<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              {%- endcase -%}
+            </svg>
+          </div>
+          <h2 class="pk-about-principle__title">{{ block.settings.title }}</h2>
+          <p class="pk-about-principle__text">{{ block.settings.text }}</p>
+        </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{%- comment -%} Story {%- endcomment -%}
+<section class="pk-about-story">
+  <div class="pk-about-story__grid">
+    <div class="pk-about-story__text pk-reveal">
+      <p class="pk-eyebrow">Why We Built It</p>
+      <h2 class="pk-about-story__title">{{ section.settings.story_title | default: 'Better decisions create better keepsakes.' }}</h2>
+      <p class="pk-about-story__body">{{ section.settings.story_p1 | default: 'A portrait is not just an image purchase. It is something people live with, gift, and remember. That is why we care about the whole experience, from the first preview to the framed final piece.' }}</p>
+      <p class="pk-about-story__body">{{ section.settings.story_p2 | default: 'We want every order to feel transparent: clear process, clear revisions, clear expectations, and a result that feels intentional in a real home.' }}</p>
+    </div>
+    <div class="pk-about-story__images pk-reveal">
+      {%- if section.settings.story_image_1 != blank -%}
+        <div class="pk-about-story__img pk-about-story__img--tall">
+          <img src="{{ section.settings.story_image_1 }}" alt="Pet portrait in a home" loading="lazy" decoding="async">
+        </div>
+      {%- endif -%}
+      {%- if section.settings.story_image_2 != blank -%}
+        <div class="pk-about-story__img">
+          <img src="{{ section.settings.story_image_2 }}" alt="Frame craftsmanship" loading="lazy" decoding="async">
+          <div class="pk-about-story__img-caption">
+            <p class="pk-eyebrow-sm">What Matters To Us</p>
+            <p style="margin-top:0.75rem;font-size:14px;line-height:1.75;color:#5F564A;">A custom artwork should feel emotionally right, visually resolved, and physically worthy of display.</p>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} CTA {%- endcomment -%}
+<section class="pk-about-cta">
+  <div class="pk-about-cta__inner pk-reveal">
+    <div>
+      <p class="pk-eyebrow">Next Step</p>
+      <h2 class="pk-about-cta__title">{{ section.settings.cta_title | default: 'Explore the preview flow when you are ready.' }}</h2>
+      <p class="pk-about-cta__text">{{ section.settings.cta_text | default: 'Start with a photo, compare directions, and move forward when the piece already feels right.' }}</p>
+    </div>
+    <a href="{{ routes.root_url }}products" class="pk-btn pk-btn--primary button-lift" style="text-transform:uppercase;letter-spacing:0.16em;">
+      {{ section.settings.cta_button | default: 'Open The Gallery' }}
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+{% stylesheet %}
+  .pk-about-hero {
+    position: relative;
+    min-height: 76vh;
+    overflow: hidden;
+    border-bottom: 1px solid #DCCFBC;
+    background: var(--pk-cream);
+  }
+  .pk-about-hero__bg {
+    position: absolute;
+    inset: 0;
+  }
+  .pk-about-hero__bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.92;
+  }
+  .pk-about-hero__gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, rgba(246,240,231,0.98) 0%, rgba(246,240,231,0.9) 38%, rgba(246,240,231,0.28) 72%, rgba(246,240,231,0.12) 100%);
+  }
+  .pk-about-hero__content {
+    position: relative;
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: calc(76vh - 4rem);
+    padding: 3rem 1.5rem;
+    max-width: 680px;
+    margin-left: max(1.5rem, calc((100% - 1600px) / 2 + 1.5rem));
+  }
+  @media (min-width: 1024px) {
+    .pk-about-hero__content { padding: 3rem 2.5rem; }
+  }
+  .pk-about-hero__title {
+    margin-top: 1rem;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+    color: #241C16;
+    max-width: 12ch;
+  }
+  .pk-about-hero__text {
+    margin-top: 1.5rem;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    line-height: 1.75rem;
+    color: #53493E;
+    max-width: 42rem;
+  }
+  .pk-about-hero__actions {
+    margin-top: 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .pk-about-hero__actions { flex-direction: row; }
+  }
+
+  /* Principles */
+  .pk-about-principles {
+    border-bottom: 1px solid #DCCFBC;
+    background: #EEE5D8;
+    padding: 2rem 1.5rem;
+  }
+  @media (min-width: 1024px) { .pk-about-principles { padding: 2rem 2.5rem; } }
+  .pk-about-principles__grid {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .pk-about-principles__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .pk-about-principle {
+    border: 1px solid #D8CBB8;
+    background: #F8F3EB;
+    padding: 1.25rem;
+  }
+  .pk-about-principle__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--pk-brown);
+    color: var(--pk-cream-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pk-about-principle__title {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #241C16;
+  }
+  .pk-about-principle__text {
+    margin-top: 0.5rem;
+    font-size: 14px;
+    line-height: 1.5rem;
+    color: #5F564A;
+  }
+
+  /* Story */
+  .pk-about-story {
+    background: #FBF8F3;
+    padding: 4.5rem 1.5rem;
+  }
+  @media (min-width: 1024px) { .pk-about-story { padding: 6rem 2.5rem; } }
+  .pk-about-story__grid {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    gap: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-about-story__grid { grid-template-columns: 0.62fr 1.38fr; gap: 2rem; }
+  }
+  .pk-about-story__title {
+    margin-top: 1rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: #241C16;
+  }
+  .pk-about-story__body {
+    margin-top: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.75rem;
+    color: #5C5247;
+  }
+  .pk-about-story__images {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-about-story__images { grid-template-columns: 0.95fr 1.05fr; }
+  }
+  .pk-about-story__img {
+    overflow: hidden;
+    border: 1px solid #E2D7C8;
+    background: white;
+  }
+  .pk-about-story__img img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+  }
+  .pk-about-story__img--tall img { min-height: 320px; height: 100%; }
+  .pk-about-story__img-caption { padding: 1.5rem; }
+
+  /* CTA */
+  .pk-about-cta {
+    border-top: 1px solid #DCCFBC;
+    background: #F4EFE7;
+    padding: 4.5rem 1.5rem;
+  }
+  @media (min-width: 1024px) { .pk-about-cta { padding: 5rem 2.5rem; } }
+  .pk-about-cta__inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-about-cta__inner { flex-direction: row; align-items: flex-end; }
+  }
+  .pk-about-cta__title {
+    margin-top: 1rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    color: #241C16;
+  }
+  .pk-about-cta__text {
+    margin-top: 1rem;
+    font-size: 1rem;
+    line-height: 1.75rem;
+    color: #5C5247;
+    max-width: 44ch;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Piktura About",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "hero_image", "label": "Hero Background Image URL" },
+    { "type": "text", "id": "hero_title", "label": "Hero Title", "default": "Piktura exists to make custom pet art feel more certain." },
+    { "type": "textarea", "id": "hero_text", "label": "Hero Text", "default": "We built Piktura around a simple idea: choosing a portrait should feel calm and informed." },
+    { "type": "text", "id": "cta_primary", "label": "Primary CTA", "default": "Start Your Painting" },
+    { "type": "text", "id": "cta_secondary", "label": "Secondary CTA", "default": "Back To Landing" },
+    { "type": "text", "id": "story_title", "label": "Story Title", "default": "Better decisions create better keepsakes." },
+    { "type": "textarea", "id": "story_p1", "label": "Story Paragraph 1" },
+    { "type": "textarea", "id": "story_p2", "label": "Story Paragraph 2" },
+    { "type": "text", "id": "story_image_1", "label": "Story Image 1 URL" },
+    { "type": "text", "id": "story_image_2", "label": "Story Image 2 URL" },
+    { "type": "text", "id": "cta_title", "label": "CTA Title", "default": "Explore the preview flow when you are ready." },
+    { "type": "textarea", "id": "cta_text", "label": "CTA Text" },
+    { "type": "text", "id": "cta_button", "label": "CTA Button", "default": "Open The Gallery" }
+  ],
+  "blocks": [
+    {
+      "type": "principle",
+      "name": "Principle",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "options": [
+          { "value": "shield", "label": "Shield" },
+          { "value": "brush", "label": "Brush" },
+          { "value": "frame", "label": "Frame" }
+        ], "default": "shield" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Preview first" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "We believe custom art should feel exciting, not uncertain." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Piktura About",
+      "blocks": [
+        { "type": "principle", "settings": { "icon": "shield", "title": "Preview first", "text": "We believe custom art should feel exciting, not uncertain. The preview step helps customers judge direction before committing." } },
+        { "type": "principle", "settings": { "icon": "brush", "title": "Artist finished", "text": "The final result is meant to feel warm, tactile, and display-worthy rather than like a one-click automated export." } },
+        { "type": "principle", "settings": { "icon": "frame", "title": "Made for the wall", "text": "Frames, scale, and room context matter just as much as the portrait itself, so the whole object feels resolved." } }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

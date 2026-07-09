@@ -1,0 +1,380 @@
+{% comment %}
+  Piktura FAQ Page Section
+  Matches Faq.tsx visual: hero, highlight notes, FAQ groups with accordion.
+{% endcomment %}
+
+{%- comment -%} Hero {%- endcomment -%}
+<section class="pk-faq-hero">
+  <div class="pk-faq-hero__content pk-reveal">
+    <p class="pk-eyebrow">Frequently Asked Questions</p>
+    <h1 class="pk-faq-hero__title">{{ section.settings.hero_title | default: 'Everything you need to know before ordering.' }}</h1>
+    <p class="pk-faq-hero__text">{{ section.settings.hero_text | default: 'Clear answers about privacy, previews, revisions, refunds, and what makes a Piktura painting different from a digital print.' }}</p>
+    <a href="{{ routes.root_url }}products" class="pk-btn pk-btn--primary button-lift" style="margin-top:2rem;">{{ section.settings.hero_cta | default: 'Start Your Painting' }}</a>
+  </div>
+</section>
+
+{%- comment -%} Highlight Notes {%- endcomment -%}
+<section class="pk-faq-highlights">
+  <div class="pk-faq-highlights__grid">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'highlight' -%}
+        <div class="pk-faq-highlight pk-reveal" {{ block.shopify_attributes }}>
+          <div class="pk-faq-highlight__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              {%- case block.settings.icon -%}
+                {%- when 'pen' -%}<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
+                {%- when 'package' -%}<path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/>
+                {%- when 'lock' -%}<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                {%- else -%}<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+              {%- endcase -%}
+            </svg>
+          </div>
+          <h3 class="pk-faq-highlight__title">{{ block.settings.title }}</h3>
+          <p class="pk-faq-highlight__text">{{ block.settings.text }}</p>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{%- comment -%} FAQ Groups {%- endcomment -%}
+<section class="pk-faq-groups">
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'faq_group' -%}
+      <div class="pk-faq-group pk-reveal" {{ block.shopify_attributes }}>
+        <div class="pk-faq-group__sidebar">
+          {%- if block.settings.group_image != blank -%}
+            <img src="{{ block.settings.group_image }}" alt="{{ block.settings.title }}" loading="lazy" decoding="async" class="pk-faq-group__image">
+          {%- endif -%}
+          <div class="pk-faq-group__sidebar-body">
+            <p class="pk-eyebrow-sm" style="color:#8B7E66;">{{ block.settings.eyebrow }}</p>
+            <h2 class="pk-faq-group__title">{{ block.settings.title }}</h2>
+            <p class="pk-faq-group__summary">{{ block.settings.summary }}</p>
+          </div>
+        </div>
+        <div class="pk-faq-group__items">
+          {%- for i in (1..6) -%}
+            {%- assign q_key = 'question_' | append: i -%}
+            {%- assign a_key = 'answer_' | append: i -%}
+            {%- if block.settings[q_key] != blank -%}
+              <details class="pk-accordion">
+                <summary class="pk-accordion__trigger">
+                  <span>{{ block.settings[q_key] }}</span>
+                  <svg class="pk-accordion__chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </summary>
+                <div class="pk-accordion__content">
+                  <p>{{ block.settings[a_key] }}</p>
+                </div>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+</section>
+
+{%- comment -%} Bottom CTA {%- endcomment -%}
+<section class="pk-faq-cta">
+  <div class="pk-faq-cta__layout">
+    <div class="pk-faq-cta__content pk-reveal">
+      <p class="pk-eyebrow">{{ section.settings.cta_eyebrow | default: 'Still Deciding' }}</p>
+      <h2 class="pk-faq-cta__title">{{ section.settings.cta_title | default: 'See your photo as a painting before you commit.' }}</h2>
+      <p class="pk-faq-cta__text">{{ section.settings.cta_text | default: 'The easiest way to understand the process is to step through it. Upload a photo, explore directions, and judge the result with more confidence.' }}</p>
+    </div>
+    <a href="{{ routes.root_url }}products" class="pk-btn pk-btn--primary button-lift pk-faq-cta__button">
+      {{ section.settings.cta_button | default: 'Open The Gallery' }}
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+{% stylesheet %}
+  .pk-faq-hero {
+    background: var(--pk-cream);
+    border-bottom: 1px solid #DCCFBC;
+    padding: 4rem 1.5rem;
+  }
+  @media (min-width: 1024px) { .pk-faq-hero { padding: 6rem 2.5rem; } }
+  .pk-faq-hero__content {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .pk-faq-hero__title {
+    margin-top: 1rem;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    color: #241C16;
+  }
+  .pk-faq-hero__text {
+    margin-top: 1.5rem;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    line-height: 1.75rem;
+    color: #53493E;
+  }
+
+  /* Highlights */
+  .pk-faq-highlights {
+    background: #EEE5D8;
+    border-bottom: 1px solid #DCCFBC;
+    padding: 2rem 1.5rem;
+  }
+  .pk-faq-highlights__grid {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .pk-faq-highlights__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .pk-faq-highlight {
+    border: 1px solid #D8CBB8;
+    background: #F8F3EB;
+    padding: 1.25rem;
+  }
+  .pk-faq-highlight__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--pk-brown);
+    color: var(--pk-cream-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pk-faq-highlight__title {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #241C16;
+  }
+  .pk-faq-highlight__text {
+    margin-top: 0.5rem;
+    font-size: 14px;
+    line-height: 1.5rem;
+    color: #5F564A;
+  }
+
+  /* FAQ Groups */
+  .pk-faq-groups {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  .pk-faq-group {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+  .pk-faq-group__sidebar {
+    overflow: hidden;
+    border: 1px solid #E2D7C8;
+    background: #fff;
+  }
+  .pk-faq-group__image {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+  }
+  .pk-faq-group__sidebar-body {
+    padding: 1.5rem;
+  }
+  .pk-faq-group__title {
+    margin-top: 0.75rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: #241C16;
+    max-width: 36ch;
+  }
+  .pk-faq-group__summary {
+    margin-top: 0.75rem;
+    font-size: 14px;
+    line-height: 1.5rem;
+    color: #62584D;
+    max-width: 60ch;
+  }
+
+  /* Accordion */
+  .pk-accordion {
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .pk-accordion:last-child { border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .pk-accordion__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2D241B;
+    cursor: pointer;
+    list-style: none;
+  }
+  .pk-accordion__trigger::-webkit-details-marker { display: none; }
+  .pk-accordion__chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    color: #8E7C66;
+  }
+  .pk-accordion[open] .pk-accordion__chevron { transform: rotate(180deg); }
+  .pk-accordion__content {
+    padding: 0 0 1rem;
+    font-size: 14px;
+    line-height: 1.625rem;
+    color: #62584D;
+    max-width: 60ch;
+  }
+
+  /* Desktop: two-column FAQ group (sidebar + items) */
+  @media (min-width: 1024px) {
+    .pk-faq-group {
+      grid-template-columns: 0.42fr 0.58fr;
+      gap: 2.5rem;
+    }
+    .pk-faq-group__sidebar {
+      position: sticky;
+      top: 6rem;
+      align-self: start;
+    }
+  }
+
+  /* FAQ CTA */
+  .pk-faq-cta {
+    border-top: 1px solid #DCCFBC;
+    background: #F4EFE7;
+    padding: 4.5rem 1.5rem;
+  }
+  .pk-faq-cta__layout {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .pk-faq-cta__content { max-width: 42rem; }
+  .pk-faq-cta__title {
+    margin-top: 1rem;
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    color: #241C16;
+  }
+  .pk-faq-cta__text {
+    margin-top: 1rem;
+    max-width: 44ch;
+    font-size: 1rem;
+    line-height: 1.75rem;
+    color: #5C5247;
+  }
+  .pk-faq-cta__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  @media (min-width: 768px) {
+    .pk-faq-cta { padding: 5rem 2.5rem; }
+    .pk-faq-cta__layout { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Piktura FAQ",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "hero_title", "label": "Hero Title", "default": "Everything you need to know before ordering." },
+    { "type": "textarea", "id": "hero_text", "label": "Hero Text" },
+    { "type": "text", "id": "hero_cta", "label": "CTA Button", "default": "Start Your Painting" },
+    { "type": "header", "content": "Bottom CTA" },
+    { "type": "text", "id": "cta_eyebrow", "label": "CTA Eyebrow", "default": "Still Deciding" },
+    { "type": "text", "id": "cta_title", "label": "CTA Title", "default": "See your photo as a painting before you commit." },
+    { "type": "textarea", "id": "cta_text", "label": "CTA Text", "default": "The easiest way to understand the process is to step through it. Upload a photo, explore directions, and judge the result with more confidence." },
+    { "type": "text", "id": "cta_button", "label": "CTA Button Text", "default": "Open The Gallery" }
+  ],
+  "blocks": [
+    {
+      "type": "highlight",
+      "name": "Highlight Note",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "options": [
+          { "value": "pen", "label": "Pen" },
+          { "value": "package", "label": "Package" },
+          { "value": "lock", "label": "Lock" },
+          { "value": "check", "label": "Check" }
+        ], "default": "check" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Preview before shipping" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "You can review the finished creation before it is packed and sent out." }
+      ]
+    },
+    {
+      "type": "faq_group",
+      "name": "FAQ Group",
+      "settings": [
+        { "type": "text", "id": "group_image", "label": "Group Image URL" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Category" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Group title here." },
+        { "type": "textarea", "id": "summary", "label": "Summary" },
+        { "type": "text", "id": "question_1", "label": "Question 1" },
+        { "type": "textarea", "id": "answer_1", "label": "Answer 1" },
+        { "type": "text", "id": "question_2", "label": "Question 2" },
+        { "type": "textarea", "id": "answer_2", "label": "Answer 2" },
+        { "type": "text", "id": "question_3", "label": "Question 3" },
+        { "type": "textarea", "id": "answer_3", "label": "Answer 3" },
+        { "type": "text", "id": "question_4", "label": "Question 4" },
+        { "type": "textarea", "id": "answer_4", "label": "Answer 4" },
+        { "type": "text", "id": "question_5", "label": "Question 5" },
+        { "type": "textarea", "id": "answer_5", "label": "Answer 5" },
+        { "type": "text", "id": "question_6", "label": "Question 6" },
+        { "type": "textarea", "id": "answer_6", "label": "Answer 6" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Piktura FAQ",
+      "blocks": [
+        { "type": "highlight", "settings": { "icon": "pen", "title": "Preview before shipping", "text": "You can review the finished creation before it is packed and sent out." } },
+        { "type": "highlight", "settings": { "icon": "package", "title": "Reasonable revisions included", "text": "Small refinements based on your original photo and approved direction are part of the process." } },
+        { "type": "highlight", "settings": { "icon": "lock", "title": "Your original photo stays private", "text": "We never publish your source photo. Finished artwork is only shared with your permission." } },
+        {
+          "type": "faq_group",
+          "settings": {
+            "eyebrow": "Photos & Privacy",
+            "title": "Your source photo stays private from the start.",
+            "summary": "We use your upload only to create the custom artwork. Public sharing happens only if you approve it.",
+            "question_1": "Will my photo or final artwork be used publicly?",
+            "answer_1": "Your original photo is used only to create your custom artwork. We will never use your original photo publicly. If we would like to feature the finished artwork in our portfolio, website, social media, or marketing materials, we will ask for your approval first. Saying no is completely fine and will not affect your order."
+          }
+        },
+        {
+          "type": "faq_group",
+          "settings": {
+            "eyebrow": "Preview & Approval",
+            "title": "The preview guides the direction. The handmade finish brings it to life.",
+            "summary": "The preview is there to build confidence and alignment, not to promise a pixel-identical printout.",
+            "question_1": "Is the preview exactly the same as the final painting?",
+            "answer_1": "No. The preview is meant to show the creative direction, not an exact pixel-for-pixel final result. Because your artwork is handmade, natural differences in brushwork, texture, color, and artistic interpretation are part of the process.",
+            "question_2": "Will I be able to review the final artwork before it ships?",
+            "answer_2": "Yes. Before your artwork is shipped, you will have a chance to review the final creation and approve it."
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

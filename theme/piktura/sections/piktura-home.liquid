@@ -1,0 +1,1106 @@
+{% comment %}
+  Piktura Homepage
+  5 sections: Hero, Style Gallery, Process, Materials, Reviews.
+  Matches visual: Home.tsx
+{% endcomment %}
+
+{% comment %} Resolve image URLs: use Theme Settings if set, else fallback to theme assets {% endcomment %}
+{% assign hero_bg_url = section.settings.hero_bg | default: 'hero-bg.png' | asset_url %}
+{% assign style1_orig_url = section.settings.style_1_original | default: 'style-original-1.png' | asset_url %}
+{% assign style1_paint_url = section.settings.style_1_painted | default: 'style-painted-1.png' | asset_url %}
+
+{% comment %} ═══════════════ 1. HERO SECTION ═══════════════ {% endcomment %}
+<section class="pk-hero" data-hero>
+  <div class="pk-hero__bg">
+    <img
+      src="{{ hero_bg_url }}"
+      class="pk-hero__bg-img"
+      width="1600" height="900"
+      fetchpriority="high" loading="eager"
+      alt="Curated interior"
+    >
+    <div class="pk-hero__bg-overlay"></div>
+  </div>
+
+  <div class="pk-hero__inner pk-fade-in">
+    <div class="pk-hero__text">
+      <p class="pk-eyebrow">{{ section.settings.hero_eyebrow }}</p>
+      <h1 class="pk-hero__title">{{ section.settings.hero_title }}</h1>
+      <p class="pk-hero__subtitle">{{ section.settings.hero_subtitle }}</p>
+      <div class="pk-hero__actions">
+        <a href="{{ section.settings.hero_cta_url }}" class="pk-btn pk-btn--primary button-lift">
+          {{ section.settings.hero_cta_label }}
+        </a>
+        <button type="button" class="pk-btn pk-btn--secondary button-lift" data-scroll-to=".pk-styles">
+          {{ section.settings.hero_secondary_label }}
+        </button>
+      </div>
+      <div class="pk-hero__meta">
+        <span>{{ section.settings.hero_meta_1 }}</span>
+        <span>{{ section.settings.hero_meta_2 }}</span>
+      </div>
+    </div>
+
+    {% comment %} Hero artwork - desktop {% endcomment %}
+    <div class="pk-hero__artwork pk-hero__artwork--desktop">
+      <div class="pk-hero__style-badge" data-hero-badge>Classic Oil</div>
+      <div class="pk-hero__source-card">
+        <img src="{{ style1_orig_url }}" alt="Source reference" width="200" height="250" loading="eager">
+        <p class="pk-eyebrow-sm">Source photo</p>
+      </div>
+      <div class="pk-hero__frame-wrap" data-hero-frame>
+        <div class="pk-frame pk-frame--simple">
+          <div class="pk-frame__inner-border">
+            <div class="pk-frame__inner-frame">
+              <div class="pk-frame__mat">
+                <div class="pk-frame__canvas pk-frame--aspect-portrait">
+                    <img src="{{ style1_orig_url }}" alt="Original photo" class="pk-hero__original" data-hero-original width="560" height="700" loading="eager">
+                    <div class="hero-morph-painted" data-hero-painted>
+                      <img src="{{ style1_paint_url }}" alt="Painted artwork" width="560" height="700" loading="eager">
+                    </div>
+                  <div class="hero-morph-overlay"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pk-hero__tags" data-hero-tags>
+        {% for block in section.blocks %}
+          {% if block.type == 'hero_style' %}
+            <button
+              type="button"
+              class="pk-hero__tag{% if forloop.first %} pk-hero__tag--active{% endif %}"
+              data-hero-tag
+              data-style-index="{{ forloop.index0 }}"
+            >
+              {{ block.settings.label }}
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {% comment %} Hero artwork - mobile {% endcomment %}
+    <div class="pk-hero__artwork pk-hero__artwork--mobile">
+      <div class="pk-hero__style-badge pk-hero__style-badge--mobile" data-hero-badge-mobile>Classic Oil</div>
+      <div class="pk-hero__frame-wrap-mobile">
+        <div class="pk-frame pk-frame--simple">
+          <div class="pk-frame__inner-border">
+            <div class="pk-frame__inner-frame">
+              <div class="pk-frame__mat">
+                <div class="pk-frame__canvas pk-frame--aspect-portrait">
+                    <img src="{{ style1_orig_url }}" alt="Original photo" class="pk-hero__original" data-hero-original-mobile width="420" height="525" loading="eager">
+                    <div class="hero-morph-painted" data-hero-painted-mobile>
+                      <img src="{{ style1_paint_url }}" alt="Painted artwork" width="420" height="525" loading="eager">
+                    </div>
+                  <div class="hero-morph-overlay"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% comment %} Source photo card (mobile) - matches Create.tsx mobile hero {% endcomment %}
+      <div class="pk-hero__source-card-mobile" data-hero-source-card-mobile>
+        <img src="{{ style1_orig_url }}" alt="Source reference" width="56" height="64" loading="eager">
+        <div>
+          <p class="pk-eyebrow-sm">Source photo</p>
+          <p class="pk-hero__source-card-mobile__title" data-hero-source-title-mobile>Classic Oil</p>
+          <p class="pk-hero__source-card-mobile__note" data-hero-source-note-mobile>Rich shadows, deeper contrast, and a gallery-ready frame.</p>
+        </div>
+      </div>
+      <div class="pk-hero__tags pk-hero__tags--mobile" data-hero-tags-mobile>
+        {% for block in section.blocks %}
+          {% if block.type == 'hero_style' %}
+            <button
+              type="button"
+              class="pk-hero__tag{% if forloop.first %} pk-hero__tag--active{% endif %}"
+              data-hero-tag-mobile
+              data-style-index="{{ forloop.index0 }}"
+            >
+              {{ block.settings.label }}
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% comment %} ═══════════════ 2. STYLE GALLERY ═══════════════ {% endcomment %}
+<section class="pk-styles" data-styles>
+  <div class="pk-styles__inner">
+    <div class="pk-styles__intro">
+      <p class="pk-eyebrow">Gallery Curator</p>
+      <h2 class="pk-styles__title">Browse styles like a private viewing, not a product grid.</h2>
+      <p class="pk-styles__subtitle">Review directions side by side and let the room-sized result answer whether the piece feels timeless, intimate, or contemporary.</p>
+      <a href="{{ section.settings.styles_cta_url }}" class="pk-btn pk-btn--ghost">
+        Start with this collection
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="pk-styles__grid">
+      <div class="pk-styles__list" data-styles-list>
+        {% for block in section.blocks %}
+          {% if block.type == 'hero_style' %}
+            <button
+              type="button"
+              class="pk-styles__item{% if forloop.first %} pk-styles__item--active{% endif %}"
+              data-style-btn
+              data-style-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              <p class="pk-eyebrow-sm">{{ block.settings.mood }}</p>
+              <h3 class="pk-styles__item-title">{{ block.settings.label }}</h3>
+              <p class="pk-styles__item-note">{{ block.settings.note }}</p>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="pk-styles__preview pk-reveal" data-styles-preview>
+        <div class="pk-styles__preview-inner">
+          <div class="pk-styles__preview-original">
+              <img src="{{ style1_orig_url }}" alt="Original" width="300" height="375" loading="lazy" decoding="async">
+          </div>
+          <div class="pk-styles__preview-framed">
+            <p class="pk-eyebrow-sm">Selected direction</p>
+            <div class="pk-styles__preview-frame">
+              <div class="pk-frame pk-frame--simple">
+                <div class="pk-frame__inner-border">
+                  <div class="pk-frame__inner-frame">
+                    <div class="pk-frame__mat">
+                      <div class="pk-frame__canvas pk-frame--aspect-portrait">
+                          <img src="{{ style1_paint_url }}" alt="Painted" width="380" height="475" loading="lazy" decoding="async" data-styles-preview-img>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="pk-styles__preview-footer">Best for customers who want the final piece to feel already resolved in a living room.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% comment %} ═══════════════ 3. PROCESS STEPS ═══════════════ {% endcomment %}
+<section class="pk-process">
+  <div class="pk-process__inner">
+    <div class="pk-process__header">
+      <div>
+        <p class="pk-eyebrow">How it works</p>
+        <h2 class="pk-process__title">A calmer path from photo to finished portrait.</h2>
+      </div>
+      <a href="{{ section.settings.process_cta_url }}" class="pk-btn pk-btn--ghost">Open the curator flow</a>
+    </div>
+
+    <div class="pk-process__grid">
+      {% assign _step_count = 0 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'process_step' %}
+          {% assign _step_count = _step_count | plus: 1 %}
+          <div class="pk-process__card pk-reveal" data-reveal-delay="{{ forloop.index0 | times: 80 }}" {{ block.shopify_attributes }}>
+            {% assign _step_img = 'process-step-' | append: _step_count | append: '.png' %}
+            {% assign _step_url = block.settings.image | default: _step_img | asset_url %}
+            <img
+              src="{{ _step_url }}"
+              alt="{{ block.settings.label }}"
+              class="pk-process__img"
+              width="400" height="500"
+              loading="lazy" decoding="async"
+            >
+            <p class="pk-eyebrow-sm pk-process__step-num">0{{ forloop.index }} {{ block.settings.label }}</p>
+            <p class="pk-process__body">{{ block.settings.body }}</p>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% comment %} ═══════════════ 4. MATERIALS ═══════════════ {% endcomment %}
+<section class="pk-materials" data-materials>
+  <div class="pk-materials__inner">
+    <div class="pk-materials__intro">
+      <p class="pk-eyebrow">Material desk</p>
+      <h2 class="pk-materials__title">The tactile part still matters.</h2>
+      <p class="pk-materials__subtitle">The digital preview sells the direction. The materials sell the permanence. We want the final piece to feel intentional in a room.</p>
+
+      <div class="pk-materials__list" data-materials-list>
+        {% for block in section.blocks %}
+          {% if block.type == 'material_story' %}
+            <button
+              type="button"
+              class="pk-materials__item{% if forloop.first %} pk-materials__item--active{% endif %}"
+              data-material-btn
+              data-material-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="pk-materials__item-icon{% if forloop.first %} pk-materials__item-icon--active{% endif %}">
+                {{ block.settings.icon_svg }}
+              </div>
+              <div>
+                <p class="pk-eyebrow-sm">{{ block.settings.label }}</p>
+                <p class="pk-materials__item-title">{{ block.settings.title }}</p>
+              </div>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="pk-materials__card pk-reveal" data-materials-card>
+      <div class="pk-materials__card-inner">
+        <div class="pk-materials__card-image" data-materials-image>
+          {% assign _first_mat_done = false %}
+          {% assign _mat_idx_card = 0 %}
+          {% for block in section.blocks %}
+            {% if block.type == 'material_story' and _first_mat_done == false %}
+              {% assign _mat_idx_card = _mat_idx_card | plus: 1 %}
+              {% assign _mat_img = 'material-' | append: _mat_idx_card | append: '.png' %}
+              {% assign _mat_url = block.settings.image | default: _mat_img | asset_url %}
+              <img src="{{ _mat_url }}" alt="{{ block.settings.title }}" width="600" height="400" loading="lazy" decoding="async">
+              {% assign _first_mat_done = true %}
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="pk-materials__card-content">
+          <p class="pk-eyebrow-sm">Studio note</p>
+          <h3 class="pk-materials__card-title" data-materials-title>
+            {% assign _first_title_done = false %}
+            {% for block in section.blocks %}
+              {% if block.type == 'material_story' and _first_title_done == false %}
+                {{ block.settings.title }}
+                {% assign _first_title_done = true %}
+              {% endif %}
+            {% endfor %}
+          </h3>
+          <p class="pk-materials__card-body" data-materials-body>
+            {% assign _first_body_done = false %}
+            {% for block in section.blocks %}
+              {% if block.type == 'material_story' and _first_body_done == false %}
+                {{ block.settings.body }}
+                {% assign _first_body_done = true %}
+              {% endif %}
+            {% endfor %}
+          </p>
+          <div class="pk-materials__card-quote">
+            Customers should feel the object is as considered as the image. That is where premium trust actually lands.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% comment %} Materials data for JS switching {% endcomment %}
+<script type="application/json" data-materials-data>
+[
+  {% assign _mat_count = 0 %}
+  {% for block in section.blocks %}
+    {% if block.type == 'material_story' %}
+      {% assign _mat_count = _mat_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+  {% assign _mat_idx = 0 %}
+  {% for block in section.blocks %}
+    {% if block.type == 'material_story' %}
+      {% assign _mat_idx = _mat_idx | plus: 1 %}
+      {% assign _mat_asset = 'material-' | append: _mat_idx | append: '.png' %}
+      {% assign _mat_img_url = block.settings.image | default: _mat_asset | asset_url %}
+      {
+        "title": {{ block.settings.title | json }},
+        "body": {{ block.settings.body | json }},
+        "image": {{ _mat_img_url | json }}
+      }{% if _mat_idx < _mat_count %},{% endif %}
+    {% endif %}
+  {% endfor %}
+]
+</script>
+
+{% comment %} ═══════════════ 5. REVIEWS ═══════════════ {% endcomment %}
+<section class="pk-reviews">
+  <div class="pk-reviews__inner">
+    <div class="pk-reviews__header">
+      <div>
+        <h2 class="pk-reviews__title">Customer Reviews</h2>
+        <div class="pk-reviews__rating">
+          <div class="pk-reviews__stars">
+            {% for i in (1..5) %}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            {% endfor %}
+          </div>
+          <p>{{ section.settings.reviews_rating_text }}</p>
+        </div>
+      </div>
+      <a href="{{ section.settings.reviews_cta_url }}" class="pk-btn pk-btn--ghost">Read All Reviews</a>
+    </div>
+
+    <div class="pk-reviews__grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'review' %}
+          <article class="pk-reviews__card pk-reveal" data-reveal-delay="{{ forloop.index0 | times: 80 }}" {{ block.shopify_attributes }}>
+            <div class="pk-reviews__stars pk-reviews__stars--sm">
+              {% for i in (1..5) %}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {% endfor %}
+            </div>
+            <h3 class="pk-reviews__card-title">{{ block.settings.title }}</h3>
+            <p class="pk-reviews__card-quote">{{ block.settings.quote }}</p>
+            <div class="pk-reviews__card-footer">
+              <div class="pk-reviews__avatar" style="background: {{ block.settings.avatar_gradient }}">
+                {{ block.settings.initials }}
+              </div>
+              <div>
+                <p class="pk-reviews__name">{{ block.settings.name }}</p>
+                <p class="pk-reviews__order">{{ block.settings.order_text }}</p>
+              </div>
+            </div>
+          </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% comment %} Hero autoplay data for JS {% endcomment %}
+<script type="application/json" data-hero-styles>
+[
+  {% for block in section.blocks %}
+    {% if block.type == 'hero_style' %}
+      {% assign _orig_asset = 'style-original-' | append: forloop.index | append: '.png' %}
+      {% assign _paint_asset = 'style-painted-' | append: forloop.index | append: '.png' %}
+      {% assign _orig_url = block.settings.original_image | default: _orig_asset | asset_url %}
+      {% assign _paint_url = block.settings.painted_image | default: _paint_asset | asset_url %}
+      {
+        "label": {{ block.settings.label | json }},
+        "note": {{ block.settings.note | json }},
+        "original": {{ _orig_url | json }},
+        "painted": {{ _paint_url | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {% endif %}
+  {% endfor %}
+]
+</script>
+
+<script src="{{ 'piktura-home.js' | asset_url }}" defer></script>
+
+{% stylesheet %}
+  /* ═══ HERO ═══ */
+  .pk-hero {
+    position: relative;
+    min-height: 88vh;
+    overflow: hidden;
+    border-bottom: 1px solid var(--pk-warm-border);
+    background: var(--pk-cream);
+  }
+  .pk-hero__bg {
+    position: absolute;
+    inset: 0;
+  }
+  .pk-hero__bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right;
+    opacity: 0.95;
+  }
+  .pk-hero__bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+      rgba(246,240,231,0.98) 0%,
+      rgba(246,240,231,0.88) 38%,
+      rgba(246,240,231,0.22) 72%,
+      rgba(246,240,231,0.08) 100%
+    );
+  }
+  .pk-hero__inner {
+    position: relative;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: calc(88vh - 4rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-hero__inner {
+      grid-template-columns: 0.8fr 1.2fr;
+      padding: 3rem 2.5rem;
+    }
+  }
+  .pk-hero__text { max-width: 520px; }
+  .pk-hero__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.05em;
+    color: var(--pk-brown-dark);
+    margin-top: 1rem;
+    max-width: 10ch;
+  }
+  .pk-hero__subtitle {
+    margin-top: 1.5rem;
+    max-width: 32rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--pk-brown-medium);
+  }
+  @media (min-width: 768px) {
+    .pk-hero__subtitle { font-size: 1.125rem; }
+  }
+  .pk-hero__actions {
+    margin-top: 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .pk-hero__actions { flex-direction: row; }
+  }
+  .pk-hero__meta {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+    color: #64594C;
+  }
+
+  /* Hero artwork */
+  .pk-hero__artwork--desktop { display: none; }
+  .pk-hero__artwork--mobile { display: block; }
+  @media (min-width: 1024px) {
+    .pk-hero__artwork--desktop { display: block; }
+    .pk-hero__artwork--mobile { display: none; }
+  }
+  .pk-hero__artwork { position: relative; }
+  .pk-hero__frame-wrap { max-width: 560px; margin-left: auto; }
+  .pk-hero__frame-wrap-mobile { max-width: 26rem; margin: 0 auto; }
+  .pk-hero__style-badge {
+    position: absolute;
+    right: 8%;
+    top: 8%;
+    z-index: 2;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.8);
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #5D5246;
+    backdrop-filter: blur(8px);
+  }
+  .pk-hero__source-card {
+    position: absolute;
+    bottom: 12%;
+    left: 5%;
+    z-index: 2;
+    width: 12rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.88);
+    padding: 0.75rem;
+    box-shadow: 0 24px 40px rgba(43,31,21,0.14);
+    backdrop-filter: blur(8px);
+  }
+  .pk-hero__source-card img {
+    width: 100%;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  .pk-hero__tags {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pk-hero__tags--mobile {
+    margin-top: 0.75rem;
+    justify-content: center;
+  }
+  .pk-hero__style-badge--mobile {
+    position: absolute;
+    right: 6%;
+    top: 4%;
+    z-index: 2;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.8);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: #5D5246;
+    backdrop-filter: blur(8px);
+  }
+  .pk-hero__source-card-mobile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 26rem;
+    margin: 0.75rem auto 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.78);
+    padding: 0.75rem;
+    box-shadow: 0 12px 28px rgba(43,31,21,0.10);
+    backdrop-filter: blur(8px);
+  }
+  .pk-hero__source-card-mobile img {
+    width: 56px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .pk-hero__source-card-mobile__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--pk-brown-dark);
+    margin-top: 0.125rem;
+  }
+  .pk-hero__source-card-mobile__note {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: #6B5E50;
+    margin-top: 0.125rem;
+  }
+  .pk-hero__tag {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.85);
+    color: #5D5246;
+  }
+  .pk-hero__tag:hover { background: white; }
+  .pk-hero__tag--active {
+    background: var(--pk-brown);
+    color: var(--pk-cream-light);
+  }
+
+  /* ═══ STYLES GALLERY ═══ */
+  .pk-styles {
+    background: var(--pk-cream-light);
+    padding: 6rem 0;
+  }
+  .pk-styles__inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: grid;
+    gap: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-styles__inner { grid-template-columns: 0.7fr 1.3fr; padding: 0 2.5rem; }
+  }
+  .pk-styles__intro { max-width: 28rem; }
+  .pk-styles__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: var(--pk-brown-dark);
+    margin-top: 1rem;
+  }
+  .pk-styles__subtitle {
+    margin-top: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #5C5247;
+  }
+  .pk-styles__grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-styles__grid { grid-template-columns: 0.62fr 1.38fr; }
+  }
+  .pk-styles__list { display: flex; flex-direction: column; gap: 0; }
+  .pk-styles__item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--pk-warm-border-light);
+    padding: 1rem 0;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    opacity: 0.65;
+  }
+  .pk-styles__item:hover { opacity: 1; }
+  .pk-styles__item--active {
+    opacity: 1;
+    border-bottom-color: var(--pk-brown);
+  }
+  .pk-styles__item-title {
+    margin-top: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--pk-inverted);
+  }
+  .pk-styles__item-note {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #62584D;
+  }
+  .pk-styles__preview-inner {
+    display: grid;
+    gap: 1.25rem;
+    border-radius: 2px;
+    border: 1px solid #DDCFBC;
+    background: var(--pk-cream);
+    padding: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .pk-styles__preview-inner { grid-template-columns: 0.82fr 1.18fr; }
+  }
+  .pk-styles__preview-original img {
+    width: 100%;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+  }
+  .pk-styles__preview-frame { margin-top: 1rem; max-width: 380px; }
+  .pk-styles__preview-footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pk-warm-border);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #5D5448;
+  }
+
+  /* ═══ PROCESS ═══ */
+  .pk-process {
+    border-top: 1px solid var(--pk-warm-border);
+    border-bottom: 1px solid var(--pk-warm-border);
+    background: var(--pk-cream-subtle);
+    padding: 6rem 0;
+  }
+  .pk-process__inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-process__inner { padding: 0 2.5rem; }
+  }
+  .pk-process__header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (min-width: 768px) {
+    .pk-process__header {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+  .pk-process__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: var(--pk-brown-dark);
+    margin-top: 1rem;
+  }
+  .pk-process__grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) {
+    .pk-process__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1280px) {
+    .pk-process__grid { grid-template-columns: repeat(5, 1fr); }
+  }
+  .pk-process__card {
+    border-radius: 2px;
+    border: 1px solid var(--pk-warm-border);
+    background: white;
+    padding: 1rem;
+  }
+  .pk-process__img {
+    width: 100%;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+  }
+  .pk-process__img-placeholder {
+    width: 100%;
+    aspect-ratio: 4/5;
+    background: var(--pk-cream-subtle);
+  }
+  .pk-process__step-num { margin-top: 1rem; }
+  .pk-process__body {
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: #4F463A;
+  }
+
+  /* ═══ MATERIALS ═══ */
+  .pk-materials {
+    background: var(--pk-cream);
+    padding: 5rem 0;
+  }
+  @media (min-width: 768px) {
+    .pk-materials { padding: 6rem 0; }
+  }
+  .pk-materials__inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: grid;
+    gap: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-materials__inner { grid-template-columns: 0.78fr 1.22fr; padding: 0 2.5rem; }
+  }
+  .pk-materials__intro { max-width: 28rem; }
+  .pk-materials__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    color: var(--pk-brown-dark);
+    margin-top: 1rem;
+  }
+  .pk-materials__subtitle {
+    margin-top: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #5f564b;
+  }
+  .pk-materials__list {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .pk-materials__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 1px solid var(--pk-warm-border-light);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pk-materials__item:hover { background: rgba(255,255,255,0.65); }
+  .pk-materials__item--active {
+    border-color: #1c1b19;
+    background: white;
+  }
+  .pk-materials__item-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ece2d3;
+    color: #5a5146;
+    flex-shrink: 0;
+  }
+  .pk-materials__item-icon--active {
+    background: #1c1b19;
+    color: white;
+  }
+  .pk-materials__item-icon svg { width: 18px; height: 18px; }
+  .pk-materials__item-title {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pk-inverted);
+  }
+  .pk-materials__card {
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #e2d8c8;
+    background: white;
+    box-shadow: 0 20px 40px rgba(46,34,21,0.08);
+  }
+  .pk-materials__card-inner {
+    display: grid;
+  }
+  @media (min-width: 768px) {
+    .pk-materials__card-inner { grid-template-columns: 1.15fr 0.85fr; }
+  }
+  .pk-materials__card-image {
+    min-height: 340px;
+    overflow: hidden;
+  }
+  .pk-materials__card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .pk-materials__card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  @media (min-width: 768px) {
+    .pk-materials__card-content { padding: 2rem; }
+  }
+  .pk-materials__card-title {
+    font-family: var(--font-heading);
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--pk-brown-dark);
+    margin-top: 0.75rem;
+  }
+  .pk-materials__card-body {
+    margin-top: 1.25rem;
+    font-size: 0.875rem;
+    line-height: 1.75;
+    color: #60574c;
+  }
+  .pk-materials__card-quote {
+    margin-top: 2rem;
+    border-radius: 8px;
+    background: #f7f1e8;
+    padding: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #5d5449;
+  }
+
+  /* ═══ REVIEWS ═══ */
+  .pk-reviews {
+    background: #F4EFE7;
+    padding: 5rem 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .pk-reviews { padding: 5rem 2.5rem; }
+  }
+  .pk-reviews__inner { max-width: 1480px; margin: 0 auto; }
+  .pk-reviews__header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .pk-reviews__header {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+  .pk-reviews__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.875rem, 3vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--pk-brown-dark);
+  }
+  .pk-reviews__rating {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    color: #5C5348;
+    font-size: 1rem;
+  }
+  .pk-reviews__stars {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #1F1B17;
+  }
+  .pk-reviews__stars--sm svg { width: 15px; height: 15px; }
+  .pk-reviews__grid {
+    margin-top: 2.5rem;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) {
+    .pk-reviews__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1280px) {
+    .pk-reviews__grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .pk-reviews__card {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 2px;
+    border: 1px solid #E0D5C6;
+    background: white;
+    padding: 1.75rem;
+    box-shadow: 0 10px 24px rgba(56,42,29,0.04);
+  }
+  .pk-reviews__card-title {
+    margin-top: 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.55rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--pk-brown-dark);
+    line-height: 1.2;
+  }
+  .pk-reviews__card-quote {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #6A6155;
+    max-width: 28ch;
+  }
+  .pk-reviews__card-footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid #E5DCCF;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .pk-reviews__avatar {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+  }
+  .pk-reviews__name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pk-brown-dark);
+  }
+  .pk-reviews__order {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #8A8175;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Piktura Homepage",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Hero Section" },
+    { "type": "text", "id": "hero_bg", "label": "Hero background image URL" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow text", "default": "AI Preview. Artist Finished." },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Your memory, curated for the wall it lives on." },
+    { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Start with a beloved photo, review several painterly directions, then refine the frame and room setting before committing to the final piece." },
+    { "type": "text", "id": "hero_cta_label", "label": "Hero CTA label", "default": "Start Your Painting" },
+    { "type": "url", "id": "hero_cta_url", "label": "Hero CTA URL" },
+    { "type": "text", "id": "hero_secondary_label", "label": "Hero secondary label", "default": "View Styles" },
+    { "type": "text", "id": "hero_meta_1", "label": "Hero meta line 1", "default": "4.9 average from 1,000+ reviews" },
+    { "type": "text", "id": "hero_meta_2", "label": "Hero meta line 2", "default": "Preview before you pay" },
+    { "type": "text", "id": "style_1_original", "label": "Style 1 original photo URL" },
+    { "type": "text", "id": "style_1_painted", "label": "Style 1 painted artwork URL" },
+    { "type": "header", "content": "Style Gallery" },
+    { "type": "url", "id": "styles_cta_url", "label": "Styles CTA URL" },
+    { "type": "header", "content": "Process Section" },
+    { "type": "url", "id": "process_cta_url", "label": "Process CTA URL" },
+    { "type": "header", "content": "Reviews Section" },
+    { "type": "text", "id": "reviews_rating_text", "label": "Reviews rating text", "default": "4.9 average • 1,000+ verified reviews" },
+    { "type": "url", "id": "reviews_cta_url", "label": "Reviews CTA URL" }
+  ],
+  "blocks": [
+    {
+      "type": "hero_style",
+      "name": "Hero Style",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Style label", "default": "Classic Oil" },
+        { "type": "text", "id": "mood", "label": "Mood", "default": "Painterly heirloom warmth" },
+        { "type": "text", "id": "note", "label": "Note", "default": "Rich shadows, deeper contrast, and a gallery-ready frame." },
+        { "type": "text", "id": "original_image", "label": "Original photo URL" },
+        { "type": "text", "id": "painted_image", "label": "Painted artwork URL" }
+      ]
+    },
+    {
+      "type": "process_step",
+      "name": "Process Step",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Step label", "default": "Upload" },
+        { "type": "textarea", "id": "body", "label": "Step description", "default": "Start with one strong photo." },
+        { "type": "text", "id": "image", "label": "Step image URL" }
+      ]
+    },
+    {
+      "type": "material_story",
+      "name": "Material Story",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Material label", "default": "Pigment" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Color that feels alive up close" },
+        { "type": "textarea", "id": "body", "label": "Description" },
+        { "type": "text", "id": "image", "label": "Material image URL" },
+        { "type": "html", "id": "icon_svg", "label": "Icon SVG", "default": "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08'/><path d='M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z'/></svg>" }
+      ]
+    },
+    {
+      "type": "review",
+      "name": "Customer Review",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Review title", "default": "Absolutely stunning." },
+        { "type": "textarea", "id": "quote", "label": "Review quote" },
+        { "type": "text", "id": "name", "label": "Reviewer name", "default": "Sarah Jenkins" },
+        { "type": "text", "id": "order_text", "label": "Order type", "default": "Ordered a Classic Oil" },
+        { "type": "text", "id": "initials", "label": "Initials", "default": "SJ" },
+        { "type": "text", "id": "avatar_gradient", "label": "Avatar gradient", "default": "linear-gradient(135deg, #b7d0de, #6f8491)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Piktura Homepage",
+      "blocks": [
+        { "type": "hero_style", "settings": { "label": "Classic Oil", "mood": "Painterly heirloom warmth", "note": "Rich shadows, deeper contrast, and a gallery-ready frame." } },
+        { "type": "hero_style", "settings": { "label": "Impressionist", "mood": "Luminous and soft", "note": "Loose brushwork that keeps the likeness and softens the moment." } },
+        { "type": "hero_style", "settings": { "label": "Modern Minimal", "mood": "Clean poster energy", "note": "Reduced forms, contemporary palette, and quiet confidence." } },
+        { "type": "hero_style", "settings": { "label": "Warm & Painterly", "mood": "Emotional and glowing", "note": "Golden light, visible brush texture, and intimate atmosphere." } },
+        { "type": "process_step", "settings": { "label": "Upload", "body": "Start with one strong photo. The better the expression, the better the piece." } },
+        { "type": "process_step", "settings": { "label": "Choose style", "body": "Review the core painterly directions and react to the one that fits the memory best." } },
+        { "type": "process_step", "settings": { "label": "Preview in room", "body": "See the artwork against believable interiors so scale and mood are easier to judge." } },
+        { "type": "process_step", "settings": { "label": "Frame it", "body": "Pair the chosen direction with a frame that makes it feel resolved on the wall." } },
+        { "type": "process_step", "settings": { "label": "Finish", "body": "The final portrait is produced as a polished, gallery-ready object for the home." } },
+        { "type": "material_story", "settings": { "label": "Pigment", "title": "Color that feels alive up close", "body": "We lean into tonal depth and brush-preserving print detail so the preview still feels tactile, not flat." } },
+        { "type": "material_story", "settings": { "label": "Canvas", "title": "Texture that keeps the piece from feeling digital", "body": "Premium canvas gives the final portrait enough grain and softness to read like a studio finish." } },
+        { "type": "material_story", "settings": { "label": "Frame", "title": "Frames that complete the mood", "body": "Warm woods and soft metallics make the portrait feel curated for a room, not merely delivered." } },
+        { "type": "material_story", "settings": { "label": "Delivery", "title": "Presentation that still feels ceremonial", "body": "Protective packaging, gifting polish, and careful finishing keep the unboxing part of the story." } },
+        { "type": "review", "settings": { "title": "Absolutely stunning.", "quote": "\"I was nervous ordering art online, but the AI preview feature gave me confidence. When the actual painting arrived, it was even better than the preview.\"", "name": "Sarah Jenkins", "order_text": "Ordered a Classic Oil", "initials": "SJ", "avatar_gradient": "linear-gradient(135deg, #b7d0de, #6f8491)" } },
+        { "type": "review", "settings": { "title": "Worth every penny.", "quote": "\"The quality of the canvas and the antique frame are top-notch. You can see the actual brushstrokes. It feels like a true heirloom piece.\"", "name": "James Mitchell", "order_text": "Ordered an Impressionist", "initials": "JM", "avatar_gradient": "linear-gradient(135deg, #b8c4cf, #61707b)" } },
+        { "type": "review", "settings": { "title": "A wonderful gift.", "quote": "\"We used the preview flow before ordering and it made the decision easy. The final framed portrait arrived feeling completely resolved.\"", "name": "Emma Rodriguez", "order_text": "Ordered a Warm & Painterly", "initials": "ER", "avatar_gradient": "linear-gradient(135deg, #8fa18f, #455647)" } },
+        { "type": "review", "settings": { "title": "The preview sold us.", "quote": "\"Seeing the portrait mocked up in a room made the choice feel obvious. It already looked like it belonged in our home.\"", "name": "Noah Parker", "order_text": "Ordered a Modern Minimal", "initials": "NP", "avatar_gradient": "linear-gradient(135deg, #d9b79a, #8a6248)" } }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
